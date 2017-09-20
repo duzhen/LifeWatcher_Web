@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
         sudo usermod -aG docker ubuntu
 
         echo "Installing python & development tools ..."
-        sudo apt-get install -y python python-dev python-pip
+        sudo apt-get install -y python python-dev python-pip build-essential
         sudo pip install --upgrade pip
         sudo pip install --upgrade virtualenv
 
