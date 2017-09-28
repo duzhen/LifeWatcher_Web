@@ -11,14 +11,14 @@ COEN6313
 ### Core  Function Development (vision detection)
 
 How to come into VM:
-vagrant up  ==> start up ur VM
-vagrant status ==> check the status of ur VM
-vagrant ssh [ur VM name]==> come into ur VM
-exit ==> exit ur VM
-vagrant halt ==> power off ur VM
+- vagrant up  ==> start up ur VM
+- vagrant status ==> check the status of ur VM
+- vagrant ssh [ur VM name]==> come into ur VM
+- exit ==> exit ur VM
+- vagrant halt ==> power off ur VM
 
 using .venv when u use python:
-in devmachine(VM):
-    cd /vagrant/
-    source .venv/bin/activate ==> can come into the python virtual environment
-    deactivate  ==> can exit the virtual environment
+- in devmachine(VM):
+    - cd /vagrant/
+    - source .venv/bin/activate ==> can come into the python virtual environment
+    - deactivate  ==> can exit the virtual environment
