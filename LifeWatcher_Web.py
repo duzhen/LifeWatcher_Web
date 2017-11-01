@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, redirect
 from flask_jsonpify import jsonify
 
 import os
@@ -12,7 +12,11 @@ from matroid.client import Matroid
 api = Matroid(client_id = '8IcsUecnIM5sAhCu', client_secret = 'nqqk1XCUvQdzaowkzEcYgqOrTJT5z5F4')
 
 @app.route('/')
-def hello_world():
+def hello():
+    return redirect("http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/", code=302)
+
+@app.route('/api')
+def api_list():
     # detectors_to_use = api.list_detectors()
     # print(detectors_to_use)
     # response = flask.Response(str(detectors_to_use))
@@ -21,18 +25,18 @@ def hello_world():
             <!DOCTYPE html>
                 <h1>Life Watcher REST API
                 <p>
-                create detector: <a href="/detector">/create</a>
+                create detector: <a href="/rest/api/detector">/rest/api/create</a>
                 <p>
-                alert condition: <a href="/username/camera/12306/setting">/user/camera/id/setting</a>
+                alert condition: <a href="/rest/api/username/camera/12306/setting">/rest/api/user/camera/id/setting</a>
                 <p>
-                get camera list: <a href="/username/camera">/user/camera</a>
+                get camera list: <a href="/rest/api/username/camera">/rest/api/user/camera</a>
                 <p>
-                do a detection: <a href="/detection">/detection</a>
+                do a detection: <a href="/rest/api/detection">/rest/api/detection</a>
             </html>'''
     response = flask.Response(body)
     return response
 
-@app.route('/detector', methods=['GET', 'POST'])
+@app.route('/rest/api/detector', methods=['GET', 'POST'])
 def detector_creation():
     result = {
         'results': {
@@ -48,7 +52,7 @@ def detector_creation():
     }
     return jsonify(result)
 
-@app.route('/<string:username>/camera/<int:id>/setting', methods=['GET', 'POST'])
+@app.route('/rest/api/<string:username>/camera/<int:id>/setting', methods=['GET', 'POST'])
 def alert_setting(username, id):
     setting = {
         'camera_id': 12315,
@@ -77,7 +81,7 @@ def alert_setting(username, id):
     result['setting'] = setting
     return jsonify(result)
 
-@app.route('/<string:username>/camera', methods=['GET', 'POST'])
+@app.route('/rest/api/<string:username>/camera', methods=['GET', 'POST'])
 def camera_list(username):
     result = {
         'results': {
@@ -117,7 +121,7 @@ def camera_list(username):
     }
     return jsonify(result)
 
-@app.route('/detection', methods=['GET', 'POST'])
+@app.route('/rest/api/detection', methods=['GET', 'POST'])
 def detector():
     if request.method == 'GET':
         body = '''
