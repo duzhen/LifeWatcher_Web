@@ -127,7 +127,7 @@ def detector():
         body = '''
             <!DOCTYPE html>
                 <title>Upload File</title>
-                <h1>Life Watcher REST API
+                <h1>Life Watcher REST API Demo
                 <p>
                 <form method="POST" enctype="multipart/form-data">
                       <input type="file" name="file">
