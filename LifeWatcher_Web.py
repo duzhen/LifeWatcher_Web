@@ -86,7 +86,7 @@ def camera_list(username):
     result = {
         'results': {
             'status': 0,  # 0 is success, the others could be fault, reason in description
-            'description': 'Setting Success.',
+            'description': 'Success.',
             'lists':[ {
                     'camera_id': 12306,
                     'state': {
@@ -126,13 +126,34 @@ def detector():
     if request.method == 'GET':
         body = '''
             <!DOCTYPE html>
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
                 <title>Upload File</title>
                 <h1>Life Watcher REST API Demo
                 <p>
                 <form method="POST" enctype="multipart/form-data">
-                      <input type="file" name="file">
+                      <input type="file" id="imgInp" name="file">
                       <input type="submit" value="Upload">
                 </form>
+                <p>
+                <img id="blah" src="#" alt="" height="50%" width="50%"/>
+                <script>
+                    function readURL(input) {
+
+                    if (input.files && input.files[0]) {
+                        var reader = new FileReader();
+                    
+                        reader.onload = function(e) {
+                          $('#blah').attr('src', e.target.result);
+                        }
+                    
+                        reader.readAsDataURL(input.files[0]);
+                      }
+                    }
+                    
+                    $("#imgInp").change(function() {
+                      readURL(this);
+                    });
+                </script>
             </html>'''
         response = flask.Response(body)
         response.headers['Access-Control-Allow-Origin'] = '*'
