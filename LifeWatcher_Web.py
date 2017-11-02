@@ -15,6 +15,11 @@ api = Matroid(client_id = '8IcsUecnIM5sAhCu', client_secret = 'nqqk1XCUvQdzaowkz
 def hello():
     return redirect("http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/api", code=302)
 
+@app.route('/<path:path>')
+def static_file(path):
+    return app.send_static_file(path)
+
+
 @app.route('/api')
 def api_list():
     # detectors_to_use = api.list_detectors()
