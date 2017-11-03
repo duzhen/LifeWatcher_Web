@@ -1,0 +1,56 @@
+.admin-dashboard {
+    background: #f5f5f5;
+    font-family: 'Gotham Rounded SSm A', 'Gotham Rounded SSm B', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+
+.admin-dashboard .frame-wrapper {
+    background: #ffffff;
+    border: 1px solid #2f4f4f;
+    margin-bottom: 10px;
+}
+
+.admin-dashboard .frame-wrapper .frame-title {
+    border-bottom: 1px solid #fffaf0;
+    color: #666;
+    font-size: 20px;
+    font-weight: 200;
+    padding: 5px 10px 5px;
+}
+
+.admin-dashboard .frame-wrapper .frame-stage {
+    overflow: hidden;
+    padding: 5px 10px;
+    position: relative;
+}
+
+.admin-dashboard .frame-wrapper .frame-notes {
+    background: #fbfbfb;
+    border-top: 1px solid #e2e2e2;
+    height: 50px;
+    color: #808080;
+    font-size: 18px;
+    padding: 5px 10px 5px;
+}
+
+.admin-dashboard .frame-wrapper .switch-toggle {
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+}
+
+.admin-dashboard .frame-wrapper .dataviz,
+.admin-dashboard .frame-wrapper .dataviz-title,
+.admin-dashboard .frame-stage .frame-title {
+    border: medium none;
+}
+
+
+.detector-list{
+    margin: auto;
+    width: 50%;
+    display: block;
+    text-align: center;
+}
+
+
