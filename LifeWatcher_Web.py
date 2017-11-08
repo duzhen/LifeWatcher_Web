@@ -4,16 +4,92 @@ from flask_jsonpify import jsonify
 import os
 import time
 import flask
+import httplib2
 import json
+import shutil
+import requests
 app = Flask(__name__)
 
 from matroid.client import Matroid
+# Zhen
+# api = Matroid(client_id = '8IcsUecnIM5sAhCu', client_secret = 'nqqk1XCUvQdzaowkzEcYgqOrTJT5z5F4')
+# Hao
+api = Matroid(client_id='CiAqy5iYxjsbwcZx', client_secret='raI42Xl0w4tAo1CCjnPICBzLYpeEyozW')
 
-api = Matroid(client_id = '8IcsUecnIM5sAhCu', client_secret = 'nqqk1XCUvQdzaowkzEcYgqOrTJT5z5F4')
+
+# List available detectors
+def list_detectors():
+    detectors_to_use = api.list_detectors()
+    return detectors_to_use
+
+
+# Classifying a picture from a file path
+def classify_image_file():
+    image_classification_result = api.classify_image(detector_id='59f93660973ab10187c7d8df', image_file='one.jpg')
+    return image_classification_result
+
+
+# Function for detector creation
+def detector_factory(keyword, detector_name):
+    zip_file = search_images(keyword=keyword)
+    # create_a_detector(zipfile=zip_file, detector_name=detector_name)
+
+
+# Create and train a detector
+def create_a_detector(keyword, detector_name):
+    zip_file = search_images(keyword=keyword)
+    print(zip_file)
+    detector_id = api.create_detector(zip_file=zip_file, name=detector_name, detector_type='general')['detector_id']
+    api.train_detector(detector_id)
+    '''
+    Here we need to bind the detetor ID and name with the user.
+    '''
+    return detector_id
+
+
+# Search images
+def search_images(keyword):
+    base_path = '/Users/Ethan/Downloads/'
+    file_path = base_path + 'images/' + keyword
+    folder_path = '/Users/Ethan/Downloads/' + keyword
+    headers = {'Content-Type': 'application/json'}
+    http = httplib2.Http()
+    api_key = 'AIzaSyBhK_WOCFeEJ--ew76gFdlbtnqgQqrbkE0'
+    engine_id = '013117329555914261701:pwgtbqdu4zy'
+    api_url = 'https://www.googleapis.com/customsearch/v1?key=' + api_key + '&searchType=image&cx=' + engine_id + '&q=' + keyword
+
+    response, content = http.request(api_url, "GET", headers=headers)
+
+    result = json.loads(content.decode())
+    items = result['items']
+    if download_images(items=items, folder=folder_path):
+        # compress the images
+        shutil.make_archive(file_path, 'zip', root_dir=base_path, base_dir=keyword)
+    else:
+        return 'Error'
+    return file_path + '.zip'
+
+
+# Download all images
+def download_images(items, folder):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    for item in items:
+        link = item['link']
+        file_name = folder + '/' + link.split('/')[-1]
+
+        r = requests.get(item['link'], stream=True)
+        if r.status_code == 200:
+            with open(file_name, 'wb') as f:
+                r.raw.decode_content = True
+                shutil.copyfileobj(r.raw, f)
+    return True
+
 
 @app.route('/')
 def hello():
     return redirect("http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/api", code=302)
+
 
 @app.route('/<path:path>')
 def static_file(path):
@@ -41,21 +117,28 @@ def api_list():
     response = flask.Response(body)
     return response
 
+
 @app.route('/rest/api/detector', methods=['GET', 'POST'])
 def detector_creation():
-    result = {
-        'results': {
-            'status':0,#0 is success, the others could be fault, reason in description
-            'description':'Create Success.',
-            'detector': {
-                'detector_id':12345678901,
-                'human_name':"Bear",
-                'label':['Bear','Panda'],
-                'permission_level':'private'# also could be open, see matroid
-            }
-        }
-    }
-    return jsonify(result)
+    # Need a keyword here to search
+    keyword = 'boat' # request.form['keyword']
+    name = 'big_boat'
+    detector_id = create_a_detector(keyword=keyword, detector_name=name)
+    training = api.train_detector(detector_id)
+    # result = {
+    #     'results': {
+    #         'status':0, # 0 is success, the others could be fault, reason in description
+    #         'description':'Create Success.',
+    #         'detector': {
+    #             'detector_id':12345678901,
+    #             'human_name':"Bear",
+    #             'label':['Bear','Panda'],
+    #             'permission_level':'private'# also could be open, see matroid
+    #         }
+    #     }
+    # }
+    return jsonify({'detector id': detector_id, 'training': training})
+
 
 @app.route('/rest/api/<string:username>/camera/<int:id>/setting', methods=['GET', 'POST'])
 def alert_setting(username, id):
@@ -85,6 +168,7 @@ def alert_setting(username, id):
 
     result['setting'] = setting
     return jsonify(result)
+
 
 @app.route('/rest/api/<string:username>/camera', methods=['GET', 'POST'])
 def camera_list(username):
@@ -125,6 +209,7 @@ def camera_list(username):
         }
     }
     return jsonify(result)
+
 
 @app.route('/rest/api/detection', methods=['GET', 'POST'])
 def detector():
@@ -192,6 +277,7 @@ def detector():
         response.headers['Access-Control-Allow-Origin'] = '*' #This is important for Mobile Device
         return response
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='80', threaded=True)
 
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port='80',threaded=True)
+# host='0.0.0.0', port='80',
