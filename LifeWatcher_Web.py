@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect
 from flask_jsonpify import jsonify
+from pymongo import mongo_client
 
 import os
 import time
@@ -29,10 +30,29 @@ def classify_image_file():
     return image_classification_result
 
 
+# Get a database client instance
+def get_an_instance():
+    client = None
+    try:
+        client = mongo_client.MongoClient("mongodb://localhost:27017")
+    except Exception:
+        print("Database connection error.")
+    return client
+
+
+# Check if the keyword is already in the database
+def exist_in_database(keyword):
+    client = get_an_instance()
+    return client.local.detectors.find_one({'name': keyword})
+
+
 # Function for detector creation
 def detector_factory(keyword, detector_name):
-    zip_file = search_images(keyword=keyword)
-    # create_a_detector(zipfile=zip_file, detector_name=detector_name)
+    detector_id = exist_in_database(keyword)
+    if detector_id is not None:
+        return detector_id
+    else:
+        return create_a_detector(keyword=keyword, detector_name=detector_name)
 
 
 # Create and train a detector
@@ -123,8 +143,9 @@ def detector_creation():
     # Need a keyword here to search
     keyword = 'boat' # request.form['keyword']
     name = 'big_boat'
-    detector_id = create_a_detector(keyword=keyword, detector_name=name)
-    training = api.train_detector(detector_id)
+    detector_id = detector_factory(keyword=keyword, detector_name=name)
+    detector_info = api.detector_info(detector_id)
+    # training = api.train_detector(detector_id)
     # result = {
     #     'results': {
     #         'status':0, # 0 is success, the others could be fault, reason in description
@@ -137,7 +158,7 @@ def detector_creation():
     #         }
     #     }
     # }
-    return jsonify({'detector id': detector_id, 'training': training})
+    return jsonify({'detector id': detector_id, 'detector info': detector_info})
 
 
 @app.route('/rest/api/<string:username>/camera/<int:id>/setting', methods=['GET', 'POST'])
@@ -279,5 +300,5 @@ def detector():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='80',threaded=True)
+    app.run(host='0.0.0.0', port='80', threaded=True)
 # host='0.0.0.0', port='80',
