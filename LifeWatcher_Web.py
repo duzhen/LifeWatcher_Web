@@ -65,10 +65,32 @@ def insert_detector(keyword, detector_id, zip_file):
         return False
 
 
+# Bind the detector to a user
+def bind_detector_user(user_id, detector_id):
+    client = get_an_instance()
+    try:
+        client.local.users.insert_one(
+            {
+                "user_id": user_id,
+                "detector_id": detector_id,
+                "status": "active"
+            }
+        )
+        client.close()
+        return True
+    except Exception:
+        return False
+
+
 # Function for detector creation
-def detector_factory(keyword, detector_name):
+def detector_factory(user_id, keyword, detector_name):
     detector_data = exist_in_database(keyword)
     if detector_data is not None:
+        # Bind the detector to the user
+        if bind_detector_user(user_id, detector_data['id']):
+            print("Binding succeeded.")
+        else:
+            return "Binding failed."
         return detector_data['id']
     else:
         return create_a_detector(keyword=keyword, detector_name=detector_name)
@@ -83,10 +105,7 @@ def create_a_detector(keyword, detector_name):
     if insert_detector(keyword, detector_id, zip_file):
         print("Detector is created and saved.")
     else:
-        print("Saving detector failed.")
-    '''
-    Here we need to bind the detector ID and name with the user.
-    '''
+        return "Saving detector failed."
     return detector_id
 
 
@@ -167,8 +186,9 @@ def detector_creation():
     # Need a keyword here to search
     keyword = 'mustang' # request.form['keyword']
     name = 'big_boat'
-    detector_id = detector_factory(keyword=keyword, detector_name=name)
-    api.train_detector(detector_id) # do not remove this line
+    user_id = 'u001'
+    detector_id = detector_factory(user_id=user_id, keyword=keyword, detector_name=name)
+    # api.train_detector(detector_id)
     detector_info = api.detector_info(detector_id)
     return jsonify({'detector id': detector_id, 'detector info': detector_info})
 
