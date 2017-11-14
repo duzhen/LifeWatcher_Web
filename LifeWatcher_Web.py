@@ -43,14 +43,33 @@ def get_an_instance():
 # Check if the keyword is already in the database
 def exist_in_database(keyword):
     client = get_an_instance()
-    return client.local.detectors.find_one({'name': keyword})
+    result = client.local.detectors.find_one({'name': keyword})
+    client.close()
+    return result
+
+
+# Insert the detector to database with the path of zip file
+def insert_detector(keyword, detector_id, zip_file):
+    client = get_an_instance()
+    try:
+        client.local.detectors.insert_one(
+            {
+                "name": keyword,
+                "id": detector_id,
+                "zip": zip_file
+            }
+        )
+        client.close()
+        return True
+    except Exception:
+        return False
 
 
 # Function for detector creation
 def detector_factory(keyword, detector_name):
-    detector_id = exist_in_database(keyword)
-    if detector_id is not None:
-        return detector_id
+    detector_data = exist_in_database(keyword)
+    if detector_data is not None:
+        return detector_data['id']
     else:
         return create_a_detector(keyword=keyword, detector_name=detector_name)
 
@@ -61,8 +80,12 @@ def create_a_detector(keyword, detector_name):
     print(zip_file)
     detector_id = api.create_detector(zip_file=zip_file, name=detector_name, detector_type='general')['detector_id']
     api.train_detector(detector_id)
+    if insert_detector(keyword, detector_id, zip_file):
+        print("Detector is created and saved.")
+    else:
+        print("Saving detector failed.")
     '''
-    Here we need to bind the detetor ID and name with the user.
+    Here we need to bind the detector ID and name with the user.
     '''
     return detector_id
 
@@ -85,6 +108,7 @@ def search_images(keyword):
     if download_images(items=items, folder=folder_path):
         # compress the images
         shutil.make_archive(file_path, 'zip', root_dir=base_path, base_dir=keyword)
+
     else:
         return 'Error'
     return file_path + '.zip'
@@ -141,23 +165,11 @@ def api_list():
 @app.route('/rest/api/detector', methods=['GET', 'POST'])
 def detector_creation():
     # Need a keyword here to search
-    keyword = 'boat' # request.form['keyword']
+    keyword = 'mustang' # request.form['keyword']
     name = 'big_boat'
     detector_id = detector_factory(keyword=keyword, detector_name=name)
+    api.train_detector(detector_id) # do not remove this line
     detector_info = api.detector_info(detector_id)
-    # training = api.train_detector(detector_id)
-    # result = {
-    #     'results': {
-    #         'status':0, # 0 is success, the others could be fault, reason in description
-    #         'description':'Create Success.',
-    #         'detector': {
-    #             'detector_id':12345678901,
-    #             'human_name':"Bear",
-    #             'label':['Bear','Panda'],
-    #             'permission_level':'private'# also could be open, see matroid
-    #         }
-    #     }
-    # }
     return jsonify({'detector id': detector_id, 'detector info': detector_info})
 
 
@@ -300,5 +312,5 @@ def detector():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='80', threaded=True)
+    app.run(threaded=True)
 # host='0.0.0.0', port='80',
