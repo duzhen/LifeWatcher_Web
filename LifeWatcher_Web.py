@@ -111,9 +111,9 @@ def create_a_detector(keyword, detector_name):
 
 # Search images
 def search_images(keyword):
-    base_path = '/Users/Ethan/Downloads/'
+    base_path = '/Downloads/'
     file_path = base_path + 'images/' + keyword
-    folder_path = '/Users/Ethan/Downloads/' + keyword
+    folder_path = '/Downloads/' + keyword
     headers = {'Content-Type': 'application/json'}
     http = httplib2.Http()
     api_key = 'AIzaSyBhK_WOCFeEJ--ew76gFdlbtnqgQqrbkE0'
@@ -332,5 +332,5 @@ def detector():
 
 
 if __name__ == '__main__':
-    app.run(threaded=True)
+    app.run(host='0.0.0.0', port='80',threaded=True)
 # host='0.0.0.0', port='80',
