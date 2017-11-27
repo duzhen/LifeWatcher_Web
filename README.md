@@ -39,3 +39,9 @@ docker start xxx(id of ur container)
 docker exec -it xxx sh
 '''
 #### come into the container
+
+In container: mkdir /Downloads 
+And in containe: mkdir /Downloads/images
+
+In container(manually): python LifeWatcher_Web.py 
+Test: in container: curl -i http://0.0.0.0:80/

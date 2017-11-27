@@ -1,0 +1,22 @@
+CHANGES
+=======
+
+* added a function that bind the detector with a user
+* added insertion function
+* Add database operations when create a detector
+* added detector creation
+* add image review
+* add image review
+* modify redirect to api, avoid cycle redirect
+* modify redirect to api, avoid cycle redirect
+* redesign rest api, support short domain watcher.life, add redirect to aws server
+* modify port to 80
+* finish REST and data model design
+* init commit
+* Update README.md
+* add the hint of VM and virtualenv
+* fix typo in Vagrantfile
+* add install python and virtualenv cmd in VM
+* build up a virtual machine for develop
+* Update README.md
+* Initial commit
