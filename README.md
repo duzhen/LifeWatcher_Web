@@ -30,6 +30,7 @@ docker build . -t lifewatcher
 
 '''
 docker run lifewatcher
+docker run -d -p 80:80 lifewatcher
 docker status
 docker start xxx(id of ur container)
 '''
