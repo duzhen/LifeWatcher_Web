@@ -275,7 +275,7 @@ def detector_creation():
     return jsonify({'detector id': detector_id, 'detector info': detector_info})
 
 
-@app.route('/rest/api/<string:username>/camera/<int:id>/setting', methods=['GET', 'POST'])
+@app.route('/rest/api/camera/<int:id>/setting', methods=['GET', 'POST'])
 def alert_setting(username, id):
     setting = {
         'camera_id': 12315,
@@ -305,7 +305,7 @@ def alert_setting(username, id):
     return jsonify(result)
 
 
-@app.route('/rest/api/<string:username>/camera', methods=['GET', 'POST'])
+@app.route('/rest/api/camera', methods=['GET', 'POST'])
 def camera_list():
     user_id = ''
     result = list_all_cameras(user_id)
