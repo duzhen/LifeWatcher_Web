@@ -139,7 +139,7 @@ def create_a_detector(keyword, detector_name):
     zip_file = search_images(keyword=keyword)
     # print(zip_file)
     detector_id = api.create_detector(zip_file=zip_file, name=detector_name, detector_type='general')['detector_id']
-    # api.train_detector(detector_id)
+    api.train_detector(detector_id)
     if insert_detector(keyword, detector_id, zip_file):
         print("Detector is created and saved.")
     else:
@@ -149,7 +149,7 @@ def create_a_detector(keyword, detector_name):
 
 # Search images
 def search_images(keyword):
-    base_path = '/Downloads/'
+    base_path = '/Downloads/' # /Users/Ethan
     file_path = base_path + 'images/' + keyword
     folder_path = '/Downloads/' + keyword
     headers = {'Content-Type': 'application/json'}
@@ -267,6 +267,9 @@ def detector_creation():
     detector_id = detector_factory(user_id=user_id, keyword=keyword, detector_name=name)
     api.train_detector(detector_id)
     detector_info = api.detector_info(detector_id)
+    while detector_info['detector']['state'] == 'pending':
+        api.train_detector(detector_id)
+        detector_info = api.detector_info(detector_id)
     return jsonify({'detector id': detector_id, 'detector info': detector_info})
 
 
