@@ -22,3 +22,26 @@ using .venv when u use python:
     - cd /vagrant/
     - source .venv/bin/activate ==> can come into the python virtual environment
     - deactivate  ==> can exit the virtual environment
+###
+'''
+docker build . -t lifewatcher
+'''
+#### use our dockerFile to build a images
+
+'''
+docker run lifewatcher
+docker status
+docker start xxx(id of ur container)
+'''
+#### use our image to build a conatiner 
+
+'''
+docker exec -it xxx sh
+'''
+#### come into the container
+
+In container: mkdir /Downloads 
+And in containe: mkdir /Downloads/images
+
+In container(manually): python LifeWatcher_Web.py 
+Test: in container: curl -i http://0.0.0.0:80/
