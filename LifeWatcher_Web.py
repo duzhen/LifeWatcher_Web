@@ -521,7 +521,7 @@ def oauth2callback():
   user = flow.oauth2session.get('https://www.googleapis.com/oauth2/v3/userinfo').json()
   print(user)
 
-  return flask.redirect(flask.url_for('test_api_request'))
+  return flask.redirect(flask.url_for('hello'))
 # user = User.filter_by(google_id=userinfo['id']).first()
 #     if user:
 #         user.name = userinfo['name']
