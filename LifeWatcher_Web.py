@@ -556,12 +556,13 @@ def revoke():
     return('An error occurred.' + print_index_table())
 
 
-@app.route('/clear')
+@app.route('/logout')
 def clear_credentials():
   if 'credentials' in flask.session:
     del flask.session['credentials']
-  return ('Credentials have been cleared.<br><br>' +
-          print_index_table())
+  return flask.redirect(flask.url_for('hello'))
+  # return ('Credentials have been cleared.<br><br>' +
+  #         print_index_table())
 
 
 def credentials_to_dict(credentials):
