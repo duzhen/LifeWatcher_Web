@@ -411,7 +411,9 @@ def detector():
               ]
         }
         file = request.files['file']
-        print(file)
+        email = request.values['email']
+        uuid = request.values['uuid']
+        print(file, email, uuid)
         filename = str(int(time.time()))+".jpeg"
         print(os.path.abspath(filename))
         file.save(filename)
