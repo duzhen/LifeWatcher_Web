@@ -213,10 +213,13 @@ def bind_camera_detector(user_id, camera_id, detector_name):
                  'camera_id': camera_id,
                  'detector_id': detector_id['detector_id']}
             )
+        result = client.local.detectors.find_one(
+            {'detector_id': detector_id}
+        )
         client.close()
-        return 'Success'
+        return result
     client.close()
-    return 'Detector not found'
+    return result
 
 
 # List all cameras of a user
@@ -275,6 +278,7 @@ def detector_creation():
     return jsonify({'detector id': detector_id, 'detector info': detector_info})
 
 
+<<<<<<< Updated upstream
 @app.route('/rest/api/camera/<int:id>/setting', methods=['GET', 'POST'])
 def alert_setting(username, id):
     setting = {
@@ -285,29 +289,43 @@ def alert_setting(username, id):
             'positive': False  # also could be True, means if then or if not then
             }
     }
+=======
+@app.route('/rest/api/camera/setting', methods=['GET', 'POST'])
+def alert_setting():
+    user_id = request.form['user_id']
+    camera_id = request.form['camera_id']
+    detector_name = request.form['detector_name']
+    status = 42
+    description = 'Setting failed.'
+    detector_info = bind_camera_detector(user_id=user_id, camera_id=camera_id, detector_name=detector_name)
+    if detector_info:
+        status = 0
+        description = 'Setting completed.'
+
+    # setting = {
+    #     'camera_id': 12315,
+    #     'condition': {
+    #         'detector_id': 12345678901,
+    #         'human_name': "Bear",
+    #         'positive': False  # also could be True, means if then or if not then
+    #         }
+    # }
+>>>>>>> Stashed changes
 
     result = {
         'results': {
-            'status': 0,  # 0 is success, the others could be fault, reason in description
-            'description': 'Setting Success.',
-            'camera_id':12315,
-            'condition': {
-                'detector_id': 12345678901,
-                'human_name': "Bear",
-                'label': ['Bear', 'Panda'],
-                'permission_level': 'private',  # also could be open, see matroid
-                'positive': True  # also could be False, means if then or if not then
-            }
+            'status': status,  # 0 is success, the others could be fault, reason in description
+            'description': description,
+            'camera_id':camera_id,
+            'detector': detector_info
         }
     }
-
-    result['setting'] = setting
     return jsonify(result)
 
 
 @app.route('/rest/api/camera', methods=['GET', 'POST'])
 def camera_list():
-    user_id = ''
+    user_id = request.form['user_id']
     result = list_all_cameras(user_id)
     # result = {
     #     'results': {
@@ -348,7 +366,7 @@ def camera_list():
     return jsonify(result)
 
 
-@app.route('/rest/api/bind_camera', methods=['GET', 'POST'])
+# integrated to alert_setting
 def bind_camera():
     user_id = 'u001'
     camera_id = 'c005'
@@ -455,6 +473,7 @@ def detector():
         response.headers['Access-Control-Allow-Origin'] = '*' #This is important for Mobile Device
         return response
 
+
 ##################COPY GOOGLE AUTH SAMPLE
 @app.route('/test')
 def test_api_request():
@@ -501,27 +520,32 @@ def authorize():
 
 @app.route('/oauth2callback')
 def oauth2callback():
-  # Specify the state when creating the flow in the callback so that it can
-  # verified in the authorization server response.
-  state = flask.session['state']
 
-  flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-      CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
-  flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+    # Specify the state when creating the flow in the callback so that it can
+    #  verified in the authorization server response.
+    state = flask.session['state']
 
-  # Use the authorization server's response to fetch the OAuth 2.0 tokens.
-  authorization_response = flask.request.url
-  flow.fetch_token(authorization_response=authorization_response)
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+          CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
+    flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
 
-  # Store credentials in the session.
-  # ACTION ITEM: In a production app, you likely want to save these
-  #              credentials in a persistent database instead.
-  credentials = flow.credentials
-  flask.session['credentials'] = credentials_to_dict(credentials)
-  user = flow.oauth2session.get('https://www.googleapis.com/oauth2/v3/userinfo').json()
-  print(user)
+    # Use the authorization server's response to fetch the OAuth 2.0 tokens.
+    authorization_response = flask.request.url
+    flow.fetch_token(authorization_response=authorization_response)
 
+    # Store credentials in the session.
+    # ACTION ITEM: In a production app, you likely want to save these
+    #              credentials in a persistent database instead.
+    credentials = flow.credentials
+    flask.session['credentials'] = credentials_to_dict(credentials)
+    user = flow.oauth2session.get('https://www.googleapis.com/oauth2/v3/userinfo').json()
+    print(user)
+
+<<<<<<< Updated upstream
   return flask.redirect(flask.url_for('hello'))
+=======
+    return flask.redirect(flask.url_for('test_api_request'))
+>>>>>>> Stashed changes
 # user = User.filter_by(google_id=userinfo['id']).first()
 #     if user:
 #         user.name = userinfo['name']
