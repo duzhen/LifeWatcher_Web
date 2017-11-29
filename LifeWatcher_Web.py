@@ -278,18 +278,6 @@ def detector_creation():
     return jsonify({'detector id': detector_id, 'detector info': detector_info})
 
 
-<<<<<<< Updated upstream
-@app.route('/rest/api/camera/<int:id>/setting', methods=['GET', 'POST'])
-def alert_setting(username, id):
-    setting = {
-        'camera_id': 12315,
-        'condition': {
-            'detector_id': 12345678901,
-            'human_name': "Bear",
-            'positive': False  # also could be True, means if then or if not then
-            }
-    }
-=======
 @app.route('/rest/api/camera/setting', methods=['GET', 'POST'])
 def alert_setting():
     user_id = request.form['user_id']
@@ -310,7 +298,6 @@ def alert_setting():
     #         'positive': False  # also could be True, means if then or if not then
     #         }
     # }
->>>>>>> Stashed changes
 
     result = {
         'results': {
@@ -541,11 +528,8 @@ def oauth2callback():
     user = flow.oauth2session.get('https://www.googleapis.com/oauth2/v3/userinfo').json()
     print(user)
 
-<<<<<<< Updated upstream
-  return flask.redirect(flask.url_for('hello'))
-=======
     return flask.redirect(flask.url_for('test_api_request'))
->>>>>>> Stashed changes
+
 # user = User.filter_by(google_id=userinfo['id']).first()
 #     if user:
 #         user.name = userinfo['name']
