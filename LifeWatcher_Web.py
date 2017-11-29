@@ -228,7 +228,9 @@ def list_all_cameras(user_id):
 
 @app.route('/')
 def hello():
-    return redirect("http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/api", code=302)
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+    return redirect("http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/index.html", code=302)
 
 
 @app.route('/<path:path>')
