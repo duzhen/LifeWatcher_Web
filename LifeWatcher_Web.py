@@ -44,16 +44,6 @@ from matroid.client import Matroid
 api = Matroid(client_id='CiAqy5iYxjsbwcZx', client_secret='raI42Xl0w4tAo1CCjnPICBzLYpeEyozW')
 
 
-# List available detectors
-def list_detectors():
-    # detectors_to_use = api.list_detectors()
-    user_id = flask.session['email_address']
-    client = get_an_instance()
-    detectors_available = client.local.users.find({'user_id': user_id})
-    client.close()
-    return detectors_available['detector_name'], detectors_available['detector_id']
-
-
 # get a detector by user id and detector name
 def get_a_detector(user_id, detector_name):
     client = get_an_instance()
@@ -293,8 +283,8 @@ def list_all_cameras(user_id):
 def hello():
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
-    return redirect('http://localhost:5000/index.html')
-    # return redirect("http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/index.html", code=302)
+    # return redirect('http://localhost:5000/index.html')
+    return redirect("http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/index.html", code=302)
 
 
 @app.route('/<path:path>')
@@ -326,8 +316,28 @@ def api_list():
     return response
 
 
+# Deprecated. List available detectors
+def list_detectors():
+    # detectors_to_use = api.list_detectors()
+    user_id = flask.session['email_address']
+    client = get_an_instance()
+    detectors_available = client.local.users.find({'user_id': user_id})
+    client.close()
+    return detectors_available['detector_name'], detectors_available['detector_id']
+
+
 @app.route('/rest/api/detector', methods=['GET', 'POST'])
 def detector_creation():
+    if request.method == 'GET':
+        user_id = flask.session['email_address']
+        client = get_an_instance()
+        detectors_available = client.local.users.find({'user_id': user_id})
+        client.close()
+        detectors = []
+        for d in detectors_available:
+            content = {'name': d['detector_name'], 'id': d['detector_id']}
+            detectors.append(content)
+        return jsonify({'detectors': detectors})
     # Need a keyword here to search
     keyword = request.values['keyword']
     name = request.values['detector_name']
@@ -687,6 +697,7 @@ def print_index_table():
           '    After clearing the token, if you <a href="/test">test the ' +
           '    API request</a> again, you should go back to the auth flow.' +
           '</td></tr></table>')
+
 
 if __name__ == '__main__':
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
