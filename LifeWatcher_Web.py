@@ -294,10 +294,13 @@ def bind_camera_detector(user_id, camera_id, detector_name):
 def list_all_cameras(user_id):
     client = get_an_instance()
     result = client.local.cameras.find({'user_id': user_id})
+    client.close()
     c_list = []
-    for c in result:
-        c_list.append(c['camera_id'])
-    return c_list
+    if result:
+        for c in result:
+            c_list.append(c['camera_id'])
+        return c_list
+    return 'Error: no camera found'
 
 
 @app.route('/')
@@ -695,7 +698,7 @@ def logout():
     return('An error occurred.' + print_index_table())
 
 
-@app.route('/logout')
+@app.route('/clear')
 def clear_credentials():
   if 'credentials' in flask.session:
     del flask.session['credentials']
