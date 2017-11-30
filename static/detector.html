@@ -39,15 +39,17 @@
 <div class="container-fluid" id="detectors">
     <div class="detector-list">
         <ul class="list-group">
-            <li class="list-group-item"><h5>Detector 1</h5></li>
-            <li class="list-group-item"><h5>Detector 2</h5></li>
-            <li class="list-group-item"><h5>Detector 3</h5></li>
-            <li class="list-group-item"><h5>Detector 4</h5></li>
-            <li class="list-group-item"><h5>Detector 5</h5></li>
-
-            <a href="/rest/api/detector" class="btn btn-info btn-lg">
-                <span class="glyphicon glyphicon-plus" style="font-size:3px"></span> Add Detector
-            </a>
+            <!--<li class="list-group-item"><h5>Detector 1</h5></li>-->
+            <!--<li class="list-group-item"><h5>Detector 2</h5></li>-->
+            <!--<li class="list-group-item"><h5>Detector 3</h5></li>-->
+            <!--<li class="list-group-item"><h5>Detector 4</h5></li>-->
+            <!--<li class="list-group-item"><h5>Detector 5</h5></li>-->
+            <form action="/rest/api/detector" method="post">
+                Detector Name: <input type="text" name="detector_name"><br>
+                Detector Keyword: <input type="text" name="keyword"><br>
+                <input type="submit" value="Add Detector">
+            </form>
+            
 
         </ul>
     </div>
