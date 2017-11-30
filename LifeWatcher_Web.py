@@ -604,6 +604,10 @@ def check():
     image_path = 'static/monitor/' + user_id + '/' + camera_id + '/alert_monitor.jpeg'
     if os.path.isfile(image_path):
         return image_path
+    else:
+        image_path = 'static/monitor/' + user_id + '/' + camera_id + '/monitor.jpeg'
+        if os.path.isfile(image_path):
+            return image_path
     return 'Error: no image found.'
 
 
