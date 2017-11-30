@@ -44,7 +44,8 @@ function addElement (cameraid) {
     div4.appendChild(div5)
     var iframe1 = document.createElement("img");
     iframe1.className = "embed-responsive-item"
-    iframe1.src = "static/schoolbus.jpg"
+    // iframe1.src = "static/schoolbus.jpg"
+    iframe1.src = "static/monitor/jenkin.du@gmail.com/E18A0527-EA9A-4BEE-A341-87BFA15204C3/monitor.jpeg"
     refreshFrame(iframe1.src, cameraid.camera_id)
     div5.appendChild(iframe1)
     var div6 = document.createElement("div");
