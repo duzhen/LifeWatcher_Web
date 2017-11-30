@@ -219,7 +219,7 @@ def create_a_detector(keyword, detector_name):
 
 # Search images
 def search_images(keyword):
-    base_path = '/Downloads/' # /Users/Ethan
+    base_path = '/Downloads/'  # /Users/Ethan
     file_path = base_path + 'images/' + keyword
     folder_path = base_path + keyword
     headers = {'Content-Type': 'application/json'}
@@ -298,7 +298,7 @@ def list_all_cameras(user_id):
     c_list = []
     if result:
         for c in result:
-            c_list.append(c['camera_id'])
+            c_list.append({c['camera_id']: c['detector_id']})
         return c_list
     return 'Error: no camera found'
 
@@ -548,13 +548,6 @@ def detector():
         camera_id = request.values['uuid']  # uuid
         insert_camera(camera_id, user_id)
 
-        detector_id = get_detector_by_camera(user_id, camera_id)
-        if not detector_id:
-            response = flask.Response(json.dumps(result))
-            response.headers['Access-Control-Allow-Origin'] = '*'  # This is important for Mobile Device
-            return response
-        keyword = get_keyword(detector_id)
-        # print(file, email, uuid)
         base_folder = 'static/monitor/' + user_id + '/' + camera_id + '/'  # /Users/Ethan/Downloads/
         filename = 'monitor.jpeg'  # str(int(time.time())) + ".jpeg"
         alert_filename = 'alert_monitor.jpeg'
@@ -565,6 +558,14 @@ def detector():
         with open(fullname, 'wb') as f:
             file.raw.decode_content = True
             shutil.copyfileobj(file.raw, f)
+
+        detector_id = get_detector_by_camera(user_id, camera_id)
+        if not detector_id:
+            response = flask.Response(json.dumps(result))
+            response.headers['Access-Control-Allow-Origin'] = '*'  # This is important for Mobile Device
+            return response
+        keyword = get_keyword(detector_id)
+        # print(file, email, uuid)
         # print(os.path.abspath(filename))
 
         # Classifying a picture from a file path
