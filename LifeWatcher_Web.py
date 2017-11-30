@@ -327,7 +327,7 @@ def list_detectors():
 @app.route('/rest/api/detector', methods=['GET', 'POST'])
 def detector_creation():
     if request.method == 'GET':
-        user_id = 'abc@xyz.com'  # flask.session['email_address']
+        user_id = flask.session['email_address']
         client = get_an_instance()
         detectors_available = client.local.users.find({'user_id': user_id})
         client.close()
@@ -693,7 +693,8 @@ def print_index_table():
           '    API request</a> again, you should go back to the auth flow.' +
           '</td></tr></table>')
 
+
 if __name__ == '__main__':
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-    app.run(threaded=True)
+    app.run(host='0.0.0.0', port='80',threaded=True)
 # host='0.0.0.0', port='80',
