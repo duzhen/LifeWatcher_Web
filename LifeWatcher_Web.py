@@ -592,7 +592,7 @@ def detector():
 def check():
     user_id = flask.session['email_address']
     camera_id = request.values['camera_id']
-    image_path = 'monitor/' + user_id + '/' + camera_id + '/alert_monitor.jpeg'
+    image_path = 'static/monitor/' + user_id + '/' + camera_id + '/alert_monitor.jpeg'
     if os.path.isfile(image_path):
         return image_path
     return 'Error: no image found.'
