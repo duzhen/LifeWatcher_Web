@@ -87,6 +87,8 @@ def get_image(user_id, camera_id):
     client = get_an_instance()
     target = client.local.monitor.find_one({'user_id': user_id, 'camera_id': camera_id})
     client.close()
+    if target == None:
+        return 'static/schoolbus.jpg'
     return target['image_path']
 
 
