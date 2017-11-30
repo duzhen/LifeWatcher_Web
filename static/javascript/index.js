@@ -144,8 +144,8 @@ function refreshFrame(src, id) {
     var client = new sendRequest();
     var params = "camera_id="+id
     client.post('http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/rest/api/check', function(response) {
-        if(!"Error" in response) {
-            if("alert" in response) {
+        if(!response.includes("Error")) {
+            if(response.includes("alert")) {
                 //set alert
             }
             src = response
