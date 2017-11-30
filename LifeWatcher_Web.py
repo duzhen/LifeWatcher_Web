@@ -380,6 +380,7 @@ def alert_setting():
     user_id = flask.session['email_address']
     camera_id = request.form['camera_id']
     detector_name = request.form['detector_name']
+    print("camera,name", camera_id, detector_name)
     status = 42
     description = 'Setting failed.'
     detector_info = bind_camera_detector(user_id=user_id, camera_id=camera_id, detector_name=detector_name)
