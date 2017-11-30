@@ -9,9 +9,22 @@ function loadDetector(id, parent) {
         var cont1 = document.createElement("div");
         cont1.className = "dropdown"
         parent.appendChild(cont1)
+        var button1 = document.createElement("button");
+        button1.className = "btn btn-secondary dropdown-toggle"
+        button1.setAttribute('type', 'button')
+        button1.setAttribute('id','dropdownMenuButton')
+        button1.setAttribute('data-toggle', 'dropdown')
+        button1.setAttribute('aria-haspopup', 'true')
+        button1.setAttribute('aria-expanded', 'false')
+        button1.appendChild(document.createTextNode("DetectorList"))
+        cont1.appendChild(button1)
+        var cont2 = document.createElement("div");
+        cont2.className = "dropdown-menu"
+        cont2.setAttribute('aria-labelledby', 'dropdownMenuButton')
+        cont1.appendChild(cont2)
         for (index in detData){
             de = detData[index];
-            expand_menu(id, de, cont1)
+            expand_menu(id, de, cont2)
         }
     });
 }
@@ -67,22 +80,10 @@ function addElement (cameraid) {
     currentDiv.appendChild(newDiv)
 }
 
-function expand_menu(id, de, cont1){
+function expand_menu(id, de, cont2){
     //dropdown menu
-    var button1 = document.createElement("button");
-    button1.className = "btn btn-secondary dropdown-toggle"
-    button1.setAttribute('type', 'button')
-    button1.setAttribute('id','dropdownMenuButton')
-    button1.setAttribute('data-toggle', 'dropdown')
-    button1.setAttribute('aria-haspopup', 'true')
-    button1.setAttribute('aria-expanded', 'false')
-    button1.appendChild(document.createTextNode("DetectorList"))
-    cont1.appendChild(button1)
-    var cont2 = document.createElement("div");
-    cont2.className = "dropdown-menu"
-    cont2.setAttribute('aria-labelledby', 'dropdownMenuButton')
-    cont1.appendChild(cont2)
-    var but_func = document.createElement("a");
+
+    var but_func = document.createElement("button");
     but_func.className = "dropdown-item"
     but_func.setAttribute('type', 'button')
     but_func.setAttribute('onclick', function(){
