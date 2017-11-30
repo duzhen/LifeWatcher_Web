@@ -153,7 +153,7 @@ function refreshFrame(src, id, div2) {
                 setRedColor(div2)
             } else {
                div2.style.borderColor = "#2f4f4f";
-                div2.style.borderWidth = "1px";
+               div2.style.borderWidth = "1px";
             }
             src.src = response;
         }
@@ -168,7 +168,7 @@ function refreshFrame(src, id, div2) {
 
     // setTimeout("refreshFrame("+src+ "," + id + ")",2000);
     setTimeout(function() {
-        refreshFrame(src, id);
+        refreshFrame(src, id, div2);
 }, 2000)
 
 }
