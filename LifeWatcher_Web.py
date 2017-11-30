@@ -235,6 +235,8 @@ def hello():
 
 @app.route('/<path:path>')
 def static_file(path):
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
     return app.send_static_file(path)
 
 
@@ -536,8 +538,8 @@ def oauth2callback():
 #     return redirect(url_for('index'))
 
 
-@app.route('/revoke')
-def revoke():
+@app.route('/logout')
+def logout():
   if 'credentials' not in flask.session:
     return ('You need to <a href="/authorize">authorize</a> before ' +
             'testing the code to revoke credentials.')
@@ -551,7 +553,9 @@ def revoke():
 
   status_code = getattr(revoke, 'status_code')
   if status_code == 200:
-    return('Credentials successfully revoked.' + print_index_table())
+    clear_credentials()
+    return flask.redirect(flask.url_for('hello'))
+    # return('Credentials successfully revoked.' + print_index_table())
   else:
     return('An error occurred.' + print_index_table())
 
