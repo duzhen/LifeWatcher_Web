@@ -56,7 +56,7 @@ def get_detector_name(user_id, detector_id):
     client = get_an_instance()
     target_detector = client.local.users.find_one({'user_id': user_id, 'detector_id': detector_id})
     client.close()
-    if not target_detector:
+    if not target_detector == None:
         return target_detector['detector_name']
 
 
