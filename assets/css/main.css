@@ -8,6 +8,7 @@
     background: #ffffff;
     border: 1px solid #2f4f4f;
     margin-bottom: 10px;
+    height:auto;
 }
 
 .admin-dashboard .frame-wrapper .frame-title {
@@ -25,6 +26,30 @@
 }
 
 .admin-dashboard .frame-wrapper .frame-notes {
+    background: #fbfbfb;
+    border-top: 1px solid #e2e2e2;
+    height: 50px;
+    color: #808080;
+    font-size: 18px;
+    padding: 5px 10px 5px;
+}
+
+.admin-dashboard .frame-wrapper .dropdown {
+    background: #fbfbfb;
+    /*border-left: 1px solid #e2e2e2;*/
+    height: 40px;
+    color: #808080;
+    font-size: 18px;
+    padding: 5px 10px 5px;
+    display: inline;
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+    overflow: inherit;
+
+}
+
+.admin-dashboard .frame-wrapper .dropdown .dropdown-menu .dropdown-item{
     background: #fbfbfb;
     border-top: 1px solid #e2e2e2;
     height: 50px;
