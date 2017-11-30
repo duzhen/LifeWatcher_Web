@@ -45,19 +45,40 @@ api = Matroid(client_id='CiAqy5iYxjsbwcZx', client_secret='raI42Xl0w4tAo1CCjnPIC
 
 
 # List available detectors
-def list_detectors(user_id):
+def list_detectors():
     # detectors_to_use = api.list_detectors()
+    user_id = flask.session['email_address']
     client = get_an_instance()
     detectors_available = client.local.users.find({'user_id': user_id})
     client.close()
     return detectors_available['detector_name'], detectors_available['detector_id']
 
 
+# get a detector by user id and detector name
 def get_a_detector(user_id, detector_name):
     client = get_an_instance()
     target_detector = client.local.users.find({'user_id': user_id, 'detector_name': detector_name})
     client.close()
     return target_detector['detector_id']
+
+
+# get a detector id by camera id
+def get_detector_by_camera(user_id, camera_id):
+    client = get_an_instance()
+    target = client.local.cameras.find_one(
+        {
+            'user_id': user_id,
+            'camera_id': camera_id
+        }
+    )
+    return target['detector_id']
+
+
+def get_keyword(detector_id):
+    client = get_an_instance()
+    target = client.local.detectors.find_one({'id': detector_id})
+    client.close()
+    return target['name']
 
 
 # Classifying a picture from a file path
@@ -99,6 +120,44 @@ def insert_detector(keyword, detector_id, zip_file):
         return True
     except Exception:
         return False
+
+
+# Save the path of an image from a camera to database
+def insert_image(user_id, camera_id, image_path):
+    client = get_an_instance()
+    exist = client.local.monitor.find_one({
+        'user_id': user_id,
+        'camera_id': camera_id
+    })
+    if exist:
+        try:
+            client.local.monitor.update_one(
+                {
+                    "user_id": user_id,
+                    "camera_id": camera_id,
+                },
+                {
+                    '$set': {'image_path': image_path}
+                }
+            )
+            client.close()
+            return True
+        except Exception:
+            return False
+    else:
+        try:
+            client.local.monitor.insert_one(
+                {
+                    "user_id": user_id,
+                    "camera_id": camera_id,
+                    'image_path': image_path
+                }
+            )
+            client.close()
+            return True
+        except Exception:
+            client.close()
+            return False
 
 
 # Bind the detector to a user
@@ -151,7 +210,7 @@ def create_a_detector(keyword, detector_name):
 def search_images(keyword):
     base_path = '/Downloads/' # /Users/Ethan
     file_path = base_path + 'images/' + keyword
-    folder_path = '/Downloads/' + keyword
+    folder_path = base_path + keyword
     headers = {'Content-Type': 'application/json'}
     http = httplib2.Http()
     api_key = 'AIzaSyBhK_WOCFeEJ--ew76gFdlbtnqgQqrbkE0'
@@ -213,28 +272,35 @@ def bind_camera_detector(user_id, camera_id, detector_name):
                  'camera_id': camera_id,
                  'detector_id': detector_id['detector_id']}
             )
+        result = detector_id['detector_name']
         client.close()
-        return 'Success'
+        return result
     client.close()
-    return 'Detector not found'
+    return result
 
 
 # List all cameras of a user
 def list_all_cameras(user_id):
     client = get_an_instance()
     result = client.local.cameras.find({'user_id': user_id})
-    return result
+    c_list = []
+    for c in result:
+        c_list.append(c['camera_id'])
+    return c_list
 
 
 @app.route('/')
 def hello():
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
-    return redirect("http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/index.html", code=302)
+    return redirect('http://localhost:5000/index.html')
+    # return redirect("http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/index.html", code=302)
 
 
 @app.route('/<path:path>')
 def static_file(path):
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
     return app.send_static_file(path)
 
 
@@ -263,9 +329,9 @@ def api_list():
 @app.route('/rest/api/detector', methods=['GET', 'POST'])
 def detector_creation():
     # Need a keyword here to search
-    keyword = 'mustang' # request.form['keyword']
-    name = 'big_boat'
-    user_id = 'u001'
+    keyword = request.values['keyword']
+    name = request.values['detector_name']
+    user_id = flask.session['email_address']
     detector_id = detector_factory(user_id=user_id, keyword=keyword, detector_name=name)
     api.train_detector(detector_id)
     detector_info = api.detector_info(detector_id)
@@ -275,39 +341,41 @@ def detector_creation():
     return jsonify({'detector id': detector_id, 'detector info': detector_info})
 
 
-@app.route('/rest/api/camera/<int:id>/setting', methods=['GET', 'POST'])
-def alert_setting(username, id):
-    setting = {
-        'camera_id': 12315,
-        'condition': {
-            'detector_id': 12345678901,
-            'human_name': "Bear",
-            'positive': False  # also could be True, means if then or if not then
-            }
-    }
+@app.route('/rest/api/camera/setting', methods=['GET', 'POST'])
+def alert_setting():
+    user_id = flask.session['email_address']
+    camera_id = request.form['camera_id']
+    detector_name = request.form['detector_name']
+    status = 42
+    description = 'Setting failed.'
+    detector_info = bind_camera_detector(user_id=user_id, camera_id=camera_id, detector_name=detector_name)
+    if detector_info:
+        status = 0
+        description = 'Setting completed.'
+
+    # setting = {
+    #     'camera_id': 12315,
+    #     'condition': {
+    #         'detector_id': 12345678901,
+    #         'human_name': "Bear",
+    #         'positive': False  # also could be True, means if then or if not then
+    #         }
+    # }
 
     result = {
         'results': {
-            'status': 0,  # 0 is success, the others could be fault, reason in description
-            'description': 'Setting Success.',
-            'camera_id':12315,
-            'condition': {
-                'detector_id': 12345678901,
-                'human_name': "Bear",
-                'label': ['Bear', 'Panda'],
-                'permission_level': 'private',  # also could be open, see matroid
-                'positive': True  # also could be False, means if then or if not then
-            }
+            'status': status,  # 0 is success, the others could be fault, reason in description
+            'description': description,
+            'camera_id': camera_id,
+            'detector': detector_info
         }
     }
-
-    result['setting'] = setting
     return jsonify(result)
 
 
-@app.route('/rest/api/camera', methods=['GET', 'POST'])
+@app.route('/rest/api/camera', methods=['GET'])  # , 'POST'
 def camera_list():
-    user_id = ''
+    user_id = flask.session['email_address']
     result = list_all_cameras(user_id)
     # result = {
     #     'results': {
@@ -348,7 +416,7 @@ def camera_list():
     return jsonify(result)
 
 
-@app.route('/rest/api/bind_camera', methods=['GET', 'POST'])
+# Deprecated. Has been integrated to alert_setting
 def bind_camera():
     user_id = 'u001'
     camera_id = 'c005'
@@ -425,37 +493,58 @@ def detector():
         response.headers['Access-Control-Allow-Origin'] = '*'
         return response
     elif request.method == 'POST':
-        result = {
-              "results": [
-                {
-                  "file": {
-                    "name": "1509446116.jpeg"
-                  },
-                  "predictions": [
-                    {
-                      "labels": {
-                        "American Black Bear": 0.9384055137634277
-                      }
-                    }
-                  ]
-                }
-              ]
-        }
+        # result = {
+        #       "results": [
+        #         {
+        #           "file": {
+        #             "name": "1509446116.jpeg"
+        #           },
+        #           "predictions": [
+        #             {
+        #               "labels": {
+        #                 "American Black Bear": 0.9384055137634277
+        #               }
+        #             }
+        #           ]
+        #         }
+        #       ]
+        # }
         file = request.files['file']
-        email = request.values['email']
-        uuid = request.values['uuid']
-        print(file, email, uuid)
-        filename = str(int(time.time()))+".jpeg"
-        print(os.path.abspath(filename))
-        file.save(filename)
+        user_id = request.values['email']  # email
+        camera_id = request.values['uuid']  # uuid
+
+        detector_id = get_detector_by_camera(user_id, camera_id)
+        keyword = get_keyword(detector_id)
+        # print(file, email, uuid)
+        base_folder = 'monitor/' + user_id + '/' + camera_id + '/'  # /Users/Ethan/Downloads/
+        filename = 'monitor.jpeg'  # str(int(time.time())) + ".jpeg"
+        fullname = base_folder + filename
+        if not os.path.exists(base_folder):
+            os.makedirs(base_folder)
+        file.save(fullname)
+        # print(os.path.abspath(filename))
+
         # Classifying a picture from a file path
-        stadium_classification_result = api.classify_image(detector_id='5884afa19a7064289fb81cac', image_file=filename)
-        print(stadium_classification_result)
-        response = flask.Response(json.dumps(stadium_classification_result))
-        response.headers['Access-Control-Allow-Origin'] = '*' #This is important for Mobile Device
+        classification_result = api.classify_image(detector_id=detector_id, image_file=fullname)
+        # print(stadium_classification_result)
+        # print(classification_result)
+        value = classification_result['results'][0]['predictions'][0]['labels'][keyword]
+        if value > 0.8:
+            filename = 'alert_monitor.jpeg'
+        fullname = base_folder + filename
+        file.save(fullname)
+        insert_image(user_id, camera_id, fullname)
+
+        response = flask.Response(json.dumps(classification_result))
+        response.headers['Access-Control-Allow-Origin'] = '*'  #This is important for Mobile Device
         return response
 
-##################COPY GOOGLE AUTH SAMPLE
+
+def check():
+    pass
+
+
+# #################COPY GOOGLE AUTH SAMPLE
 @app.route('/test')
 def test_api_request():
   if 'credentials' not in flask.session:
@@ -501,27 +590,30 @@ def authorize():
 
 @app.route('/oauth2callback')
 def oauth2callback():
-  # Specify the state when creating the flow in the callback so that it can
-  # verified in the authorization server response.
-  state = flask.session['state']
 
-  flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-      CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
-  flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+    # Specify the state when creating the flow in the callback so that it can
+    #  verified in the authorization server response.
+    state = flask.session['state']
 
-  # Use the authorization server's response to fetch the OAuth 2.0 tokens.
-  authorization_response = flask.request.url
-  flow.fetch_token(authorization_response=authorization_response)
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+          CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
+    flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
 
-  # Store credentials in the session.
-  # ACTION ITEM: In a production app, you likely want to save these
-  #              credentials in a persistent database instead.
-  credentials = flow.credentials
-  flask.session['credentials'] = credentials_to_dict(credentials)
-  user = flow.oauth2session.get('https://www.googleapis.com/oauth2/v3/userinfo').json()
-  print(user)
+    # Use the authorization server's response to fetch the OAuth 2.0 tokens.
+    authorization_response = flask.request.url
+    flow.fetch_token(authorization_response=authorization_response)
 
-  return flask.redirect(flask.url_for('hello'))
+    # Store credentials in the session.
+    # ACTION ITEM: In a production app, you likely want to save these
+    #              credentials in a persistent database instead.
+    credentials = flow.credentials
+    flask.session['credentials'] = credentials_to_dict(credentials)
+    user = flow.oauth2session.get('https://www.googleapis.com/oauth2/v3/userinfo').json()
+    flask.session['email_address'] = user['email']
+    print(user)
+
+    return flask.redirect(flask.url_for('hello'))
+
 # user = User.filter_by(google_id=userinfo['id']).first()
 #     if user:
 #         user.name = userinfo['name']
@@ -536,8 +628,8 @@ def oauth2callback():
 #     return redirect(url_for('index'))
 
 
-@app.route('/revoke')
-def revoke():
+@app.route('/logout')
+def logout():
   if 'credentials' not in flask.session:
     return ('You need to <a href="/authorize">authorize</a> before ' +
             'testing the code to revoke credentials.')
@@ -551,7 +643,9 @@ def revoke():
 
   status_code = getattr(revoke, 'status_code')
   if status_code == 200:
-    return('Credentials successfully revoked.' + print_index_table())
+    clear_credentials()
+    return flask.redirect(flask.url_for('hello'))
+    # return('Credentials successfully revoked.' + print_index_table())
   else:
     return('An error occurred.' + print_index_table())
 
