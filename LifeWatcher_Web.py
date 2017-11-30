@@ -695,7 +695,7 @@ def logout():
     return('An error occurred.' + print_index_table())
 
 
-@app.route('/logout')
+@app.route('/clear')
 def clear_credentials():
   if 'credentials' in flask.session:
     del flask.session['credentials']
