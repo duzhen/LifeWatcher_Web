@@ -381,7 +381,7 @@ def detector_creation():
         return jsonify({'detectors': detectors})
     # Need a keyword here to search
     keyword = request.values['keyword']
-    name = request.values['detector_name']
+    name = keyword  # request.values['detector_name']
     user_id = flask.session['email_address']
     detector_id = detector_factory(user_id=user_id, keyword=keyword, detector_name=name)
     api.train_detector(detector_id)
