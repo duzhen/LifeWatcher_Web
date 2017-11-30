@@ -6,9 +6,12 @@ function loadDetector(id, parent) {
     var client = new sendRequest();
     client.get('http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/rest/api/detector', function(response) {
         var detData = JSON.parse(response).detectors;
+        var cont1 = document.createElement("div");
+        cont1.className = "dropdown"
+        parent.appendChild(cont1)
         for (index in detData){
             de = detData[index];
-            expand_menu(id, de, parent)
+            expand_menu(id, de, cont1)
         }
     });
 }
@@ -64,11 +67,8 @@ function addElement (cameraid) {
     currentDiv.appendChild(newDiv)
 }
 
-function expand_menu(id, de, div_parent){
+function expand_menu(id, de, cont1){
     //dropdown menu
-    var cont1 = document.createElement("div");
-    cont1.className = "dropdown"
-    div_parent.appendChild(cont1)
     var button1 = document.createElement("button");
     button1.className = "btn btn-secondary dropdown-toggle"
     button1.setAttribute('type', 'button')
@@ -169,6 +169,6 @@ function refreshFrame(src, id, div2) {
     // setTimeout("refreshFrame("+src+ "," + id + ")",2000);
     setTimeout(function() {
         refreshFrame(src, id, div2);
-}, 2000)
+}, 1000)
 
 }
