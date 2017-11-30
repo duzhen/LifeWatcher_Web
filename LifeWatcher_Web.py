@@ -208,7 +208,7 @@ def create_a_detector(keyword, detector_name):
 
 # Search images
 def search_images(keyword):
-    base_path = '/Users/Ethan/Downloads/' # /Users/Ethan
+    base_path = '/Downloads/' # /Users/Ethan
     file_path = base_path + 'images/' + keyword
     folder_path = base_path + keyword
     headers = {'Content-Type': 'application/json'}
@@ -685,5 +685,5 @@ def print_index_table():
 
 if __name__ == '__main__':
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-    app.run(threaded=True)
+    app.run(host='0.0.0.0', port='80',threaded=True)
 # host='0.0.0.0', port='80',
