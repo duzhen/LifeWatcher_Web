@@ -46,7 +46,7 @@ function addElement (cameraid) {
     iframe1.className = "embed-responsive-item"
     iframe1.src = "static/schoolbus.jpg"
     // iframe1.src = "static/monitor/jenkin.du@gmail.com/E18A0527-EA9A-4BEE-A341-87BFA15204C3/monitor.jpeg"
-    refreshFrame(iframe1, cameraid.camera_id)
+    refreshFrame(iframe1, cameraid.camera_id, div2)
     div5.appendChild(iframe1)
     var div6 = document.createElement("div");
     div6.className = "switch-toggle"
@@ -137,8 +137,12 @@ var sendRequest = function() {
     }
 }
 
+function setRedColor(div2) {
+    div2.style.borderColor = "red";
+    div2.style.borderWidth = "2px";
+}
 
-function refreshFrame(src, id) {
+function refreshFrame(src, id, div2) {
 
     var client = new sendRequest();
     var params = "camera_id="+id
@@ -146,6 +150,10 @@ function refreshFrame(src, id) {
         if(!response.includes("Error")) {
             if(response.includes("alert")) {
                 //set alert
+                setRedColor(div2)
+            } else {
+               div2.style.borderColor = "#2f4f4f";
+                div2.style.borderWidth = "1px";
             }
             src.src = response;
         }
