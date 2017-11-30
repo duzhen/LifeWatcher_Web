@@ -389,7 +389,7 @@ def detector_creation():
     while detector_info['detector']['state'] == 'pending':
         api.train_detector(detector_id)
         detector_info = api.detector_info(detector_id)
-    return flask.redirect(flask.url_for('detector.html'))
+    return flask.redirect('detector.html')
     # return jsonify({'detector id': detector_id, 'detector info': detector_info})
 
 
