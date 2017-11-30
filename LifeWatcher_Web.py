@@ -44,16 +44,6 @@ from matroid.client import Matroid
 api = Matroid(client_id='CiAqy5iYxjsbwcZx', client_secret='raI42Xl0w4tAo1CCjnPICBzLYpeEyozW')
 
 
-# List available detectors
-def list_detectors():
-    # detectors_to_use = api.list_detectors()
-    user_id = flask.session['email_address']
-    client = get_an_instance()
-    detectors_available = client.local.users.find({'user_id': user_id})
-    client.close()
-    return detectors_available['detector_name'], detectors_available['detector_id']
-
-
 # get a detector by user id and detector name
 def get_a_detector(user_id, detector_name):
     client = get_an_instance()
@@ -324,8 +314,28 @@ def api_list():
     return response
 
 
+# Deprecated. List available detectors
+def list_detectors():
+    # detectors_to_use = api.list_detectors()
+    user_id = flask.session['email_address']
+    client = get_an_instance()
+    detectors_available = client.local.users.find({'user_id': user_id})
+    client.close()
+    return detectors_available['detector_name'], detectors_available['detector_id']
+
+
 @app.route('/rest/api/detector', methods=['GET', 'POST'])
 def detector_creation():
+    if request.method == 'GET':
+        user_id = 'abc@xyz.com'  # flask.session['email_address']
+        client = get_an_instance()
+        detectors_available = client.local.users.find({'user_id': user_id})
+        client.close()
+        detectors = []
+        for d in detectors_available:
+            content = (d['detector_name'], d['detector_id'])
+            detectors.append(content)
+        return jsonify({'detectors': detectors})
     # Need a keyword here to search
     keyword = request.values['keyword']
     name = request.values['detector_name']
@@ -685,5 +695,5 @@ def print_index_table():
 
 if __name__ == '__main__':
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-    app.run(host='0.0.0.0', port='80',threaded=True)
+    app.run(threaded=True)
 # host='0.0.0.0', port='80',
