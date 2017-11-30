@@ -333,7 +333,7 @@ def detector_creation():
         client.close()
         detectors = []
         for d in detectors_available:
-            content = (d['detector_name'], d['detector_id'])
+            content = {'name': d['detector_name'], 'id': d['detector_id']}
             detectors.append(content)
         return jsonify({'detectors': detectors})
     # Need a keyword here to search
