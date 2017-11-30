@@ -47,9 +47,16 @@ api = Matroid(client_id='CiAqy5iYxjsbwcZx', client_secret='raI42Xl0w4tAo1CCjnPIC
 # get a detector by user id and detector name
 def get_a_detector(user_id, detector_name):
     client = get_an_instance()
-    target_detector = client.local.users.find({'user_id': user_id, 'detector_name': detector_name})
+    target_detector = client.local.users.find_one({'user_id': user_id, 'detector_name': detector_name})
     client.close()
     return target_detector['detector_id']
+
+
+def get_detector_name(user_id, detector_id):
+    client = get_an_instance()
+    target_detector = client.local.users.find_one({'user_id': user_id, 'detector_id': detector_id})
+    client.close()
+    return target_detector['detector_name']
 
 
 # get a detector id by camera id
@@ -298,7 +305,8 @@ def list_all_cameras(user_id):
     c_list = []
     if result:
         for c in result:
-            c_list.append({'camera_id': c['camera_id'], 'detector_id': c['detector_id']})
+            name = get_detector_name(user_id, c['detector_id'])
+            c_list.append({'camera_id': c['camera_id'], 'detector_id': c['detector_id'], 'detector_name': name})
         return c_list
     return 'Error: no camera found'
 
