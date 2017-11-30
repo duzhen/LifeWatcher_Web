@@ -52,12 +52,30 @@ def list_detectors(user_id):
     client.close()
     return detectors_available['detector_name'], detectors_available['detector_id']
 
-
+# get a detector by user id and detector name
 def get_a_detector(user_id, detector_name):
     client = get_an_instance()
     target_detector = client.local.users.find({'user_id': user_id, 'detector_name': detector_name})
     client.close()
     return target_detector['detector_id']
+
+# get a detector id by camera id
+def get_detector_by_camera(user_id, camera_id):
+    client = get_an_instance()
+    target = client.local.cameras.find_one(
+        {
+            'user_id': user_id,
+            'camera_id': camera_id
+        }
+    )
+    return target['detector_id']
+
+
+def get_keyword(detector_id):
+    client = get_an_instance()
+    target= client.local.detectors.find({'detector_id': detector_id})
+    client.close()
+    return target['name']
 
 
 # Classifying a picture from a file path
@@ -99,6 +117,54 @@ def insert_detector(keyword, detector_id, zip_file):
         return True
     except Exception:
         return False
+
+
+# Save the path of an image from a camera to database
+def insert_image(user_id, camera_id, safety, image_path):
+    client = get_an_instance()
+    exist = client.local.monitor.find_one({
+        'user_id': user_id,
+        'camera_id': camera_id
+    })
+    if exist:
+        try:
+            client.local.monitor.update_one(
+                {
+                    "user_id": user_id,
+                    "camera_id": camera_id,
+                },
+                {
+                    '$set': {safety: image_path}
+                }
+            )
+            client.close()
+            return True
+        except Exception:
+            return False
+    else:
+        try:
+            client.local.monitor.insert_one(
+                {
+                    "user_id": user_id,
+                    "camera_id": camera_id,
+                    "normal": '',
+                    "alert": ''
+                }
+            )
+            client.local.monitor.update_one(
+                {
+                    "user_id": user_id,
+                    "camera_id": camera_id,
+                },
+                {
+                    '$set': {safety: image_path}
+                }
+            )
+            client.close()
+            return True
+        except Exception:
+            client.close()
+            return False
 
 
 # Bind the detector to a user
@@ -266,9 +332,9 @@ def api_list():
 @app.route('/rest/api/detector', methods=['GET', 'POST'])
 def detector_creation():
     # Need a keyword here to search
-    keyword = 'mustang' # request.form['keyword']
-    name = 'big_boat'
-    user_id = 'u001'
+    keyword = request.values['keyword']
+    name = request.values['detector_name']
+    user_id = request.values['user_id']
     detector_id = detector_factory(user_id=user_id, keyword=keyword, detector_name=name)
     api.train_detector(detector_id)
     detector_info = api.detector_info(detector_id)
@@ -353,7 +419,7 @@ def camera_list():
     return jsonify(result)
 
 
-# integrated to alert_setting
+# Deprecated. Has been integrated to alert_setting
 def bind_camera():
     user_id = 'u001'
     camera_id = 'c005'
@@ -430,38 +496,52 @@ def detector():
         response.headers['Access-Control-Allow-Origin'] = '*'
         return response
     elif request.method == 'POST':
-        result = {
-              "results": [
-                {
-                  "file": {
-                    "name": "1509446116.jpeg"
-                  },
-                  "predictions": [
-                    {
-                      "labels": {
-                        "American Black Bear": 0.9384055137634277
-                      }
-                    }
-                  ]
-                }
-              ]
-        }
+        # result = {
+        #       "results": [
+        #         {
+        #           "file": {
+        #             "name": "1509446116.jpeg"
+        #           },
+        #           "predictions": [
+        #             {
+        #               "labels": {
+        #                 "American Black Bear": 0.9384055137634277
+        #               }
+        #             }
+        #           ]
+        #         }
+        #       ]
+        # }
         file = request.files['file']
-        email = request.values['email']
-        uuid = request.values['uuid']
-        print(file, email, uuid)
-        filename = str(int(time.time()))+".jpeg"
+        user_id = request.values['email']  # email
+        camera_id = request.values['uuid']  # uuid
+
+        detector_id = get_detector_by_camera(user_id, camera_id)
+        keyword = get_keyword(detector_id)
+        # print(file, email, uuid)
+        base_folder = '/monitor/' + user_id + '/' + camera_id + '/'
+        normal_folder = base_folder + 'normal/'
+        alert_folder = base_folder + 'alert/'
+        filename = str(int(time.time())) + ".jpeg"
+        full_name = normal_folder + filename
         print(os.path.abspath(filename))
-        file.save(filename)
+        file.save(full_name)
+        insert_image(user_id, camera_id, 'normal', full_name)
         # Classifying a picture from a file path
-        stadium_classification_result = api.classify_image(detector_id='5884afa19a7064289fb81cac', image_file=filename)
-        print(stadium_classification_result)
-        response = flask.Response(json.dumps(stadium_classification_result))
-        response.headers['Access-Control-Allow-Origin'] = '*' #This is important for Mobile Device
+        classification_result = api.classify_image(detector_id=detector_id, image_file=filename)
+        # print(stadium_classification_result)
+        value = classification_result['results'][0]['predictions']['labels'][keyword]
+        if float(value) > 0.8:
+            full_name = alert_folder + filename
+            file.save(full_name)
+            insert_image(user_id, camera_id, 'alert', full_name)
+
+        response = flask.Response(json.dumps(classification_result))
+        response.headers['Access-Control-Allow-Origin'] = '*'  #This is important for Mobile Device
         return response
 
 
-##################COPY GOOGLE AUTH SAMPLE
+# #################COPY GOOGLE AUTH SAMPLE
 @app.route('/test')
 def test_api_request():
   if 'credentials' not in flask.session:
