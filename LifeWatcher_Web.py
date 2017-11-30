@@ -589,15 +589,14 @@ def detector():
         # print(classification_result)
         value = classification_result['results'][0]['predictions'][0]['labels'][keyword]
         if value > 0.5:
-            fullname = base_folder + alert_filename
+            new_fullname = base_folder + alert_filename
+            os.renames(fullname, new_fullname)
         # elif os.path.isfile(base_folder + alert_filename):
         #     os.remove(base_folder + alert_filename)
-        else:
-            fullname = base_folder + filename
-        file.save(fullname)
-        # with open(fullname, 'wb') as f:
-        #     file.raw.decode_content = True
-        #     shutil.copyfileobj(file.raw, f)
+        # else:
+        #     fullname = base_folder + filename
+        # file.save(fullname)
+
         insert_image(user_id, camera_id, fullname)
 
         response = flask.Response(json.dumps(classification_result))
