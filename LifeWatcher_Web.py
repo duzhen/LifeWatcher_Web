@@ -533,6 +533,7 @@ def detector():
         # print(file, email, uuid)
         base_folder = 'monitor/' + user_id + '/' + camera_id + '/'  # /Users/Ethan/Downloads/
         filename = 'monitor.jpeg'  # str(int(time.time())) + ".jpeg"
+        alert_filename = 'alert_monitor.jpeg'
         fullname = base_folder + filename
         if not os.path.exists(base_folder):
             os.makedirs(base_folder)
@@ -544,8 +545,10 @@ def detector():
         # print(stadium_classification_result)
         # print(classification_result)
         value = classification_result['results'][0]['predictions'][0]['labels'][keyword]
-        if value > 0.8:
+        if value > 0.5:
             filename = 'alert_monitor.jpeg'
+        elif os.path.isfile(base_folder + alert_filename):
+            os.remove(base_folder + alert_filename)
         fullname = base_folder + filename
         file.save(fullname)
         insert_image(user_id, camera_id, fullname)
@@ -562,10 +565,6 @@ def check():
     image_path = 'monitor/' + user_id + '/' + camera_id + '/alert_monitor.jpeg'
     if os.path.isfile(image_path):
         return image_path
-    else:
-        image_path = 'monitor/' + user_id + '/' + camera_id + '/monitor.jpeg'
-        if os.path.isfile(image_path):
-            return image_path
     return 'Error: no image found.'
 
 
@@ -713,5 +712,5 @@ def print_index_table():
 
 if __name__ == '__main__':
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-    app.run(host='0.0.0.0', port='80',threaded=True)
+    app.run(threaded=True)
 # host='0.0.0.0', port='80',
