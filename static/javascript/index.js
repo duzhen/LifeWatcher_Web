@@ -159,6 +159,6 @@ function refreshFrame(src, id) {
 
     //call itself again (in milliseconds)
 
-    setTimeout("refreshFrame("+src+ "," + id + ")",2000);
+    setTimeout("refreshFrame("+src+ "," + id + "\)",2000);
 
 }
