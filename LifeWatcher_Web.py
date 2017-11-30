@@ -56,7 +56,8 @@ def get_detector_name(user_id, detector_id):
     client = get_an_instance()
     target_detector = client.local.users.find_one({'user_id': user_id, 'detector_id': detector_id})
     client.close()
-    return target_detector['detector_name']
+    if not target_detector:
+        return target_detector['detector_name']
 
 
 # get a detector id by camera id
@@ -315,7 +316,8 @@ def list_all_cameras(user_id):
     if result:
         for c in result:
             name = get_detector_name(user_id, c['detector_id'])
-            c_list.append({'camera_id': c['camera_id'], 'detector_id': c['detector_id'], 'detector_name': name})
+            if not name:
+                c_list.append({'camera_id': c['camera_id'], 'detector_id': c['detector_id'], 'detector_name': name})
         return c_list
     return 'Error: no camera found'
 
