@@ -81,6 +81,14 @@ def get_keyword(detector_id):
     return target['name']
 
 
+# get the image of camera
+def get_image(user_id, camera_id):
+    client = get_an_instance()
+    target = client.local.monitor.find_one({'user_id': user_id, 'camera_id': camera_id})
+    client.close()
+    return target['image_path']
+
+
 # Classifying a picture from a file path
 def classify_image_file():
     image_classification_result = api.classify_image(detector_id='59f93660973ab10187c7d8df', image_file='one.jpg')
@@ -161,6 +169,7 @@ def insert_image(user_id, camera_id, image_path):
             client.close()
             return True
         except Exception:
+            client.close()
             return False
     else:
         try:
@@ -558,15 +567,12 @@ def detector():
         insert_camera(camera_id, user_id)
 
         base_folder = 'static/monitor/' + user_id + '/' + camera_id + '/'  # /Users/Ethan/Downloads/
-        filename = 'monitor.jpeg'  # str(int(time.time())) + ".jpeg"
-        alert_filename = 'alert_monitor.jpeg'
+        filename = 'monitor' + str(int(time.time())) + ".jpeg"
+        alert_filename = 'alert_monitor' + str(int(time.time())) + '.jpeg'
         fullname = base_folder + filename
         if not os.path.exists(base_folder):
             os.makedirs(base_folder)
         file.save(fullname)
-        # with open(fullname, 'wb') as f:
-        #     file.raw.decode_content = True
-        #     shutil.copyfileobj(file.raw, f)
 
         detector_id = get_detector_by_camera(user_id, camera_id)
         if not detector_id:
@@ -583,10 +589,11 @@ def detector():
         # print(classification_result)
         value = classification_result['results'][0]['predictions'][0]['labels'][keyword]
         if value > 0.5:
-            filename = 'alert_monitor.jpeg'
-        elif os.path.isfile(base_folder + alert_filename):
-            os.remove(base_folder + alert_filename)
-        fullname = base_folder + filename
+            fullname = base_folder + alert_filename
+        # elif os.path.isfile(base_folder + alert_filename):
+        #     os.remove(base_folder + alert_filename)
+        else:
+            fullname = base_folder + filename
         file.save(fullname)
         # with open(fullname, 'wb') as f:
         #     file.raw.decode_content = True
@@ -602,14 +609,15 @@ def detector():
 def check():
     user_id = flask.session['email_address']
     camera_id = request.values['camera_id']
-    image_path = 'static/monitor/' + user_id + '/' + camera_id + '/alert_monitor.jpeg'
-    if os.path.isfile(image_path):
-        return image_path
-    else:
-        image_path = 'static/monitor/' + user_id + '/' + camera_id + '/monitor.jpeg'
-        if os.path.isfile(image_path):
-            return image_path
-    return 'Error: no image found.'
+    image_path = get_image(user_id, camera_id)
+    # if os.path.isfile(image_path):
+    #     return image_path
+    # else:
+    #     image_path = 'static/monitor/' + user_id + '/' + camera_id + '/monitor.jpeg'
+    #     if os.path.isfile(image_path):
+    #         return image_path
+    # return 'Error: no image found.'
+    return image_path
 
 
 # #################COPY GOOGLE AUTH SAMPLE
