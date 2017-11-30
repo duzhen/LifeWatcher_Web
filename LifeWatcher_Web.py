@@ -578,6 +578,7 @@ def detector():
         # print(os.path.abspath(filename))
 
         # Classifying a picture from a file path
+        print(detector_id, fullname)
         classification_result = api.classify_image(detector_id=detector_id, image_file=fullname)
         # print(classification_result)
         value = classification_result['results'][0]['predictions'][0]['labels'][keyword]
