@@ -555,18 +555,20 @@ def detector():
             return response
         keyword = get_keyword(detector_id)
         # print(file, email, uuid)
-        base_folder = 'monitor/' + user_id + '/' + camera_id + '/'  # /Users/Ethan/Downloads/
+        base_folder = 'static/monitor/' + user_id + '/' + camera_id + '/'  # /Users/Ethan/Downloads/
         filename = 'monitor.jpeg'  # str(int(time.time())) + ".jpeg"
         alert_filename = 'alert_monitor.jpeg'
         fullname = base_folder + filename
         if not os.path.exists(base_folder):
             os.makedirs(base_folder)
-        file.save(fullname)
+        # file.save(fullname)
+        with open(fullname, 'wb') as f:
+            file.raw.decode_content = True
+            shutil.copyfileobj(file.raw, f)
         # print(os.path.abspath(filename))
 
         # Classifying a picture from a file path
         classification_result = api.classify_image(detector_id=detector_id, image_file=fullname)
-        # print(stadium_classification_result)
         # print(classification_result)
         value = classification_result['results'][0]['predictions'][0]['labels'][keyword]
         if value > 0.5:
@@ -574,7 +576,10 @@ def detector():
         elif os.path.isfile(base_folder + alert_filename):
             os.remove(base_folder + alert_filename)
         fullname = base_folder + filename
-        file.save(fullname)
+        # file.save(fullname)
+        with open(fullname, 'wb') as f:
+            file.raw.decode_content = True
+            shutil.copyfileobj(file.raw, f)
         insert_image(user_id, camera_id, fullname)
 
         response = flask.Response(json.dumps(classification_result))
