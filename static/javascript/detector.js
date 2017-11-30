@@ -4,7 +4,7 @@ function loadFrames() {
     // addElement ();
 
     var client = new sendRequest();
-    client.get('http://watcher.life/rest/api/detector', function(response) {
+    client.get('http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/rest/api/detector', function(response) {
         var detData = response.detectors;
         for (i in detData){
             addElement (i.id, i.name);
