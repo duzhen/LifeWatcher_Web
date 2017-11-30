@@ -7,7 +7,8 @@ function loadFrames() {
     client.get('http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/rest/api/detector', function(response) {
         var detData = JSON.parse(response).detectors;
         for (i in detData){
-            addElement (i.id, i.name);
+            de = JSON.parse(i);
+            addElement (de.id, de.name);
         }
     });
 }
@@ -28,7 +29,7 @@ function addElement (inputId, inputName) {
 function addLi(parent_ul, inputId, inputName) {
     var li = document.createElement("li");
     li.className = "list-group-item"
-    li.appendChild(document.createTextNode("ID:" + inputId + "<br>" + "Name" + inputName))
+    li.appendChild(document.createTextNode("ID:" + inputId + "-" + "Name:" + inputName));
     parent_ul.appendChild(li)
 }
 
