@@ -147,8 +147,7 @@ function refreshFrame(src, id) {
             if(response.includes("alert")) {
                 //set alert
             }
-            src.src = response
-            src.update()
+            src.src = response;
         }
     }, params);
     // img = document.images;
