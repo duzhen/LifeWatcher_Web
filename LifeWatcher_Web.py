@@ -61,7 +61,10 @@ def get_detector_by_camera(user_id, camera_id):
             'camera_id': camera_id
         }
     )
-    return target['detector_id']
+    if target:
+        return target['detector_id']
+    else:
+        return None
 
 
 def get_keyword(detector_id):
@@ -501,27 +504,31 @@ def detector():
         response.headers['Access-Control-Allow-Origin'] = '*'
         return response
     elif request.method == 'POST':
-        # result = {
-        #       "results": [
-        #         {
-        #           "file": {
-        #             "name": "1509446116.jpeg"
-        #           },
-        #           "predictions": [
-        #             {
-        #               "labels": {
-        #                 "American Black Bear": 0.9384055137634277
-        #               }
-        #             }
-        #           ]
-        #         }
-        #       ]
-        # }
+        result = {
+              "results": [
+                {
+                  "file": {
+                    "name": "0"
+                  },
+                  "predictions": [
+                    {
+                      "labels": {
+                        "American Black Bear": 0
+                      }
+                    }
+                  ]
+                }
+              ]
+        }
         file = request.files['file']
         user_id = request.values['email']  # email
         camera_id = request.values['uuid']  # uuid
 
         detector_id = get_detector_by_camera(user_id, camera_id)
+        if not detector_id:
+            response = flask.Response(json.dumps(result))
+            response.headers['Access-Control-Allow-Origin'] = '*'  # This is important for Mobile Device
+            return response
         keyword = get_keyword(detector_id)
         # print(file, email, uuid)
         base_folder = 'monitor/' + user_id + '/' + camera_id + '/'  # /Users/Ethan/Downloads/
@@ -548,8 +555,18 @@ def detector():
         return response
 
 
+@app.route('/rest/api/check', methods=['POST'])
 def check():
-    pass
+    user_id = flask.session['email_address']
+    camera_id = request.values['camera_id']
+    image_path = 'monitor/' + user_id + '/' + camera_id + '/alert_monitor.jpeg'
+    if os.path.isfile(image_path):
+        return image_path
+    else:
+        image_path = 'monitor/' + user_id + '/' + camera_id + '/monitor.jpeg'
+        if os.path.isfile(image_path):
+            return image_path
+    return 'Error: no image found.'
 
 
 # #################COPY GOOGLE AUTH SAMPLE
