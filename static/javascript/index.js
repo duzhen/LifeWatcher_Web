@@ -52,7 +52,7 @@ function addElement (cameraid) {
     div2.appendChild(div6)
     var div7 = document.createElement("div");
     div7.className = "frame-notes"
-    div7.appendChild(document.createTextNode("Description"))
+    div7.appendChild(document.createTextNode(cameraid.detector_id))
     div2.appendChild(div7)
 
     loadDetector(cameraid.camera_id, div7)
@@ -159,6 +159,6 @@ function refreshFrame(src, id) {
 
     //call itself again (in milliseconds)
 
-    setTimeout("refreshFrame()",2000);
+    setTimeout("refreshFrame("+src+ "," + id + ")",2000);
 
 }
