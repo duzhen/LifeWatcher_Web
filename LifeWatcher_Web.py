@@ -56,8 +56,7 @@ def get_detector_name(user_id, detector_id):
     client = get_an_instance()
     target_detector = client.local.users.find_one({'user_id': user_id, 'detector_id': detector_id})
     client.close()
-    if not target_detector == None:
-        return target_detector['detector_name']
+    return target_detector['detector_name']
 
 
 # get a detector id by camera id
@@ -87,8 +86,6 @@ def get_image(user_id, camera_id):
     client = get_an_instance()
     target = client.local.monitor.find_one({'user_id': user_id, 'camera_id': camera_id})
     client.close()
-    if target == None:
-        return 'static/schoolbus.jpg'
     return target['image_path']
 
 
@@ -318,8 +315,7 @@ def list_all_cameras(user_id):
     if result:
         for c in result:
             name = get_detector_name(user_id, c['detector_id'])
-            if not name:
-                c_list.append({'camera_id': c['camera_id'], 'detector_id': c['detector_id'], 'detector_name': name})
+            c_list.append({'camera_id': c['camera_id'], 'detector_id': c['detector_id'], 'detector_name': name})
         return c_list
     return 'Error: no camera found'
 
