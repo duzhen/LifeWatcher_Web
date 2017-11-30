@@ -1,11 +1,5 @@
 document.body.onload = loadFrames;
 
-function loadFrames() {
-    addElement ();
-    addElement ();
-    addElement ();
-}
-
 function loadDetector(id, parent) {
     // addElement ();
 
@@ -21,18 +15,17 @@ function loadDetector(id, parent) {
 
 function loadFrames() {
     // addElement ();
-
     var client = new sendRequest();
     client.get('http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/rest/api/camera', function(response) {
         var camera = JSON.parse(response);
         for (index in camera){
-            id = camera[index];
-            addElement (id);
+            cameraid = camera[index];
+            addElement (cameraid);
         }
     });
 }
 
-function addElement (id) {
+function addElement (cameraid) {
     // create a new div element
     var newDiv = document.createElement("div");
     newDiv.className = 'col-sm-6 col-md-4'
@@ -41,7 +34,7 @@ function addElement (id) {
     newDiv.appendChild(div2)
     var div3 = document.createElement("div");
     div3.className = "frame-title"
-    div3.appendChild(document.createTextNode(id))
+    div3.appendChild(document.createTextNode(cameraid.id))
     div2.appendChild(div3)
     var div4 = document.createElement("div");
     div4.className = "frame-stage"
@@ -52,6 +45,7 @@ function addElement (id) {
     var iframe1 = document.createElement("img");
     iframe1.className = "embed-responsive-item"
     iframe1.src = "http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/static/schoolbus.jpg"
+    refreshFrame(iframe1.src, cameraid.id)
     div5.appendChild(iframe1)
     var div6 = document.createElement("div");
     div6.className = "switch-toggle"
@@ -61,7 +55,7 @@ function addElement (id) {
     div7.appendChild(document.createTextNode("Description"))
     div2.appendChild(div7)
 
-    loadDetector(id, div7)
+    loadDetector(cameraid.id, div7)
 
 
     // add the newly created element and its content into the DOM
@@ -138,4 +132,26 @@ var sendRequest = function() {
         }
         requestClient.send(params);
     }
+}
+
+
+function refreshFrame(src, id) {
+
+    var client = new sendRequest();
+    var params = "camera_id="+id
+    client.post('http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/rest/api/check', function(response) {
+        if(!response.contains("Error")) {
+            src = response
+        }
+    }, params);
+    // img = document.images;
+    //
+    // img.src = img.src + "?" + Math.random();
+
+    //Following statement sets the delay before the function will
+
+    //call itself again (in milliseconds)
+
+    setTimeout("refreshFrame()",2000);
+
 }
