@@ -34,7 +34,7 @@ function addElement (cameraid) {
     newDiv.appendChild(div2)
     var div3 = document.createElement("div");
     div3.className = "frame-title"
-    div3.appendChild(document.createTextNode(cameraid.id))
+    div3.appendChild(document.createTextNode(cameraid.camera_id))
     div2.appendChild(div3)
     var div4 = document.createElement("div");
     div4.className = "frame-stage"
@@ -45,7 +45,7 @@ function addElement (cameraid) {
     var iframe1 = document.createElement("img");
     iframe1.className = "embed-responsive-item"
     iframe1.src = "http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/static/schoolbus.jpg"
-    refreshFrame(iframe1.src, cameraid.id)
+    refreshFrame(iframe1.src, cameraid.camera_id)
     div5.appendChild(iframe1)
     var div6 = document.createElement("div");
     div6.className = "switch-toggle"
@@ -55,7 +55,7 @@ function addElement (cameraid) {
     div7.appendChild(document.createTextNode("Description"))
     div2.appendChild(div7)
 
-    loadDetector(cameraid.id, div7)
+    loadDetector(cameraid.camera_id, div7)
 
 
     // add the newly created element and its content into the DOM
@@ -83,13 +83,16 @@ function expand_menu(id, de, div_parent){
     cont1.appendChild(cont2)
     var but_func = document.createElement("a");
     but_func.className = "dropdown-item"
-    but_func.setAttribute('href', '#')
     but_func.setAttribute('type', 'button')
     but_func.setAttribute('onclick', function(){
         setcamera(id, de.name);
     });
     but_func.setAttribute('return', 'false')
-    but_func.appendChild(document.createTextNode(de.name))
+    text = document.createTextNode(de.name)
+    text.setAttribute('onclick', function(){
+        setcamera(id, de.name);
+    });
+    but_func.appendChild(text)
     cont2.appendChild(but_func)
 
 }
@@ -126,7 +129,7 @@ var sendRequest = function() {
         requestClient.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
         requestClient.onreadystatechange = function() {//Call a function when the state changes.
-            if(http.readyState == 4 && http.status == 200) {
+            if(requestClient.readyState == 4 && requestClient.status == 200) {
                 callback(requestClient.responseText);
             }
         }
