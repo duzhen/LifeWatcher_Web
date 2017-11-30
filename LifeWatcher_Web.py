@@ -98,6 +98,24 @@ def exist_in_database(keyword):
     return result
 
 
+# Check if a camera belongs to a user. If not exists, insert one.
+def insert_camera(camera_id, user_id):
+    client = get_an_instance()
+    result = client.local.cameras.find_one({'camera_id': camera_id, 'user_id': user_id})
+    if not result:
+        try:
+            client.local.cameras.insert_one(
+                {'user_id': user_id,
+                 'camera_id': camera_id,
+                 'detector_id': None}
+            )
+        except Exception:
+            client.close()
+            return False
+    client.close()
+    return True
+
+
 # Insert the detector to database with the path of zip file
 def insert_detector(keyword, detector_id, zip_file):
     client = get_an_instance()
@@ -525,6 +543,7 @@ def detector():
         file = request.files['file']
         user_id = request.values['email']  # email
         camera_id = request.values['uuid']  # uuid
+        insert_camera(camera_id, user_id)
 
         detector_id = get_detector_by_camera(user_id, camera_id)
         if not detector_id:
@@ -717,5 +736,5 @@ def print_index_table():
 
 if __name__ == '__main__':
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-    app.run(threaded=True)
+    app.run(host='0.0.0.0', port='80', threaded=True)
 # host='0.0.0.0', port='80',
