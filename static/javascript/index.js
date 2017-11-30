@@ -87,14 +87,21 @@ function expand_menu(id, de, div_parent){
     but_func.setAttribute('onclick', function(){
         setcamera(id, de.name);
     });
-    but_func.setAttribute('return', 'false')
-    btn = document.createElement("button")
-    btn.setAttribute('name', de.name)
-    btn.setAttribute('onclick', function(){
+    but_func.addEventListener("click", function(){
         setcamera(id, de.name);
     });
-    but_func.appendChild(btn)
+    // but_func.setAttribute('return', 'false')
+    // btn = document.createElement("button")
+    // btn.setAttribute('name', de.name)
+    // btn.setAttribute('onclick', function(){
+    //     setcamera(id, de.name);
+    // });
+    but_func.setAttribute('return', 'false')
+    but_func.appendChild(document.createTextNode(de.name))
     cont2.appendChild(but_func)
+    //
+    // but_func.appendChild(btn)
+    // cont2.appendChild(but_func)
 
 }
 
