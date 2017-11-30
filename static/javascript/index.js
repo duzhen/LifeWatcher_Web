@@ -6,7 +6,7 @@ function loadFrames() {
     addElement ();
 }
 
-function loadDetector(parent) {
+function loadDetector(id, parent) {
     // addElement ();
 
     var client = new sendRequest();
@@ -14,7 +14,7 @@ function loadDetector(parent) {
         var detData = JSON.parse(response).detectors;
         for (index in detData){
             de = detData[index];
-            expand_menu(de, parent)
+            expand_menu(id, de, parent)
         }
     });
 }
@@ -61,7 +61,7 @@ function addElement (id) {
     div7.appendChild(document.createTextNode("Description"))
     div2.appendChild(div7)
 
-    loadDetector(div7)
+    loadDetector(id, div7)
 
 
     // add the newly created element and its content into the DOM
@@ -69,7 +69,7 @@ function addElement (id) {
     currentDiv.appendChild(newDiv)
 }
 
-function expand_menu(de, div_parent){
+function expand_menu(id, de, div_parent){
     //dropdown menu
     var cont1 = document.createElement("div");
     cont1.className = "dropdown"
@@ -91,11 +91,25 @@ function expand_menu(de, div_parent){
     but_func.className = "dropdown-item"
     but_func.setAttribute('href', '#')
     but_func.setAttribute('type', 'button')
-    but_func.setAttribute('onclick', 'Function()')
+    but_func.setAttribute('onclick', function(){
+        setcamera(id, de.name);
+    });
     but_func.setAttribute('return', 'false')
     but_func.appendChild(document.createTextNode(de.name))
     cont2.appendChild(but_func)
 
+}
+
+function setcamera(id, name) {
+    var client = new sendRequest();
+    var params = "camera_id="+id + "&detector_name=" +name
+    client.post('http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/rest/api/camera/setting', function(response) {
+        // var detData = JSON.parse(response).detectors;
+        // for (index in detData){
+        //     de = detData[index];
+        //     expand_menu(id, de, parent)
+        // }
+    }, params);
 }
 
 var sendRequest = function() {
@@ -108,5 +122,20 @@ var sendRequest = function() {
 
         requestClient.open( "GET", path, true );
         requestClient.send( null );
+    }
+
+    this.post = function (path, callback, params) {
+        var requestClient = new XMLHttpRequest();
+        requestClient.open("POST", path, true);
+
+        //Send the proper header information along with the request
+        requestClient.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+        requestClient.onreadystatechange = function() {//Call a function when the state changes.
+            if(http.readyState == 4 && http.status == 200) {
+                callback(requestClient.responseText);
+            }
+        }
+        requestClient.send(params);
     }
 }
