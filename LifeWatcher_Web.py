@@ -554,10 +554,10 @@ def detector():
         fullname = base_folder + filename
         if not os.path.exists(base_folder):
             os.makedirs(base_folder)
-        # file.save(fullname)
-        with open(fullname, 'wb') as f:
-            file.raw.decode_content = True
-            shutil.copyfileobj(file.raw, f)
+        file.save(fullname)
+        # with open(fullname, 'wb') as f:
+        #     file.raw.decode_content = True
+        #     shutil.copyfileobj(file.raw, f)
 
         detector_id = get_detector_by_camera(user_id, camera_id)
         if not detector_id:
@@ -577,10 +577,10 @@ def detector():
         elif os.path.isfile(base_folder + alert_filename):
             os.remove(base_folder + alert_filename)
         fullname = base_folder + filename
-        # file.save(fullname)
-        with open(fullname, 'wb') as f:
-            file.raw.decode_content = True
-            shutil.copyfileobj(file.raw, f)
+        file.save(fullname)
+        # with open(fullname, 'wb') as f:
+        #     file.raw.decode_content = True
+        #     shutil.copyfileobj(file.raw, f)
         insert_image(user_id, camera_id, fullname)
 
         response = flask.Response(json.dumps(classification_result))
