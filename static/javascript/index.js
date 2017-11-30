@@ -88,11 +88,12 @@ function expand_menu(id, de, div_parent){
         setcamera(id, de.name);
     });
     but_func.setAttribute('return', 'false')
-    text = document.createTextNode(de.name)
-    text.setAttribute('onclick', function(){
+    btn = document.createElement("button")
+    btn.setAttribute('name', de.name)
+    btn.setAttribute('onclick', function(){
         setcamera(id, de.name);
     });
-    but_func.appendChild(text)
+    but_func.appendChild(btn)
     cont2.appendChild(but_func)
 
 }
