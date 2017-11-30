@@ -45,12 +45,14 @@ api = Matroid(client_id='CiAqy5iYxjsbwcZx', client_secret='raI42Xl0w4tAo1CCjnPIC
 
 
 # List available detectors
-def list_detectors(user_id):
+def list_detectors():
     # detectors_to_use = api.list_detectors()
+    user_id = flask.session['email_address']
     client = get_an_instance()
     detectors_available = client.local.users.find({'user_id': user_id})
     client.close()
     return detectors_available['detector_name'], detectors_available['detector_id']
+
 
 # get a detector by user id and detector name
 def get_a_detector(user_id, detector_name):
@@ -58,6 +60,7 @@ def get_a_detector(user_id, detector_name):
     target_detector = client.local.users.find({'user_id': user_id, 'detector_name': detector_name})
     client.close()
     return target_detector['detector_id']
+
 
 # get a detector id by camera id
 def get_detector_by_camera(user_id, camera_id):
@@ -73,7 +76,7 @@ def get_detector_by_camera(user_id, camera_id):
 
 def get_keyword(detector_id):
     client = get_an_instance()
-    target= client.local.detectors.find({'detector_id': detector_id})
+    target = client.local.detectors.find_one({'id': detector_id})
     client.close()
     return target['name']
 
@@ -120,7 +123,7 @@ def insert_detector(keyword, detector_id, zip_file):
 
 
 # Save the path of an image from a camera to database
-def insert_image(user_id, camera_id, safety, image_path):
+def insert_image(user_id, camera_id, image_path):
     client = get_an_instance()
     exist = client.local.monitor.find_one({
         'user_id': user_id,
@@ -134,7 +137,7 @@ def insert_image(user_id, camera_id, safety, image_path):
                     "camera_id": camera_id,
                 },
                 {
-                    '$set': {safety: image_path}
+                    '$set': {'image_path': image_path}
                 }
             )
             client.close()
@@ -147,17 +150,7 @@ def insert_image(user_id, camera_id, safety, image_path):
                 {
                     "user_id": user_id,
                     "camera_id": camera_id,
-                    "normal": '',
-                    "alert": ''
-                }
-            )
-            client.local.monitor.update_one(
-                {
-                    "user_id": user_id,
-                    "camera_id": camera_id,
-                },
-                {
-                    '$set': {safety: image_path}
+                    'image_path': image_path
                 }
             )
             client.close()
@@ -215,9 +208,9 @@ def create_a_detector(keyword, detector_name):
 
 # Search images
 def search_images(keyword):
-    base_path = '/Downloads/' # /Users/Ethan
+    base_path = '/Users/Ethan/Downloads/' # /Users/Ethan
     file_path = base_path + 'images/' + keyword
-    folder_path = '/Downloads/' + keyword
+    folder_path = base_path + keyword
     headers = {'Content-Type': 'application/json'}
     http = httplib2.Http()
     api_key = 'AIzaSyBhK_WOCFeEJ--ew76gFdlbtnqgQqrbkE0'
@@ -279,9 +272,7 @@ def bind_camera_detector(user_id, camera_id, detector_name):
                  'camera_id': camera_id,
                  'detector_id': detector_id['detector_id']}
             )
-        result = client.local.detectors.find_one(
-            {'detector_id': detector_id}
-        )
+        result = detector_id['detector_name']
         client.close()
         return result
     client.close()
@@ -292,14 +283,18 @@ def bind_camera_detector(user_id, camera_id, detector_name):
 def list_all_cameras(user_id):
     client = get_an_instance()
     result = client.local.cameras.find({'user_id': user_id})
-    return result
+    c_list = []
+    for c in result:
+        c_list.append(c['camera_id'])
+    return c_list
 
 
 @app.route('/')
 def hello():
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
-    return redirect("http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/index.html", code=302)
+    return redirect('http://localhost:5000/index.html')
+    # return redirect("http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/index.html", code=302)
 
 
 @app.route('/<path:path>')
@@ -334,7 +329,7 @@ def detector_creation():
     # Need a keyword here to search
     keyword = request.values['keyword']
     name = request.values['detector_name']
-    user_id = request.values['user_id']
+    user_id = flask.session['email_address']
     detector_id = detector_factory(user_id=user_id, keyword=keyword, detector_name=name)
     api.train_detector(detector_id)
     detector_info = api.detector_info(detector_id)
@@ -346,7 +341,7 @@ def detector_creation():
 
 @app.route('/rest/api/camera/setting', methods=['GET', 'POST'])
 def alert_setting():
-    user_id = request.form['user_id']
+    user_id = flask.session['email_address']
     camera_id = request.form['camera_id']
     detector_name = request.form['detector_name']
     status = 42
@@ -369,16 +364,16 @@ def alert_setting():
         'results': {
             'status': status,  # 0 is success, the others could be fault, reason in description
             'description': description,
-            'camera_id':camera_id,
+            'camera_id': camera_id,
             'detector': detector_info
         }
     }
     return jsonify(result)
 
 
-@app.route('/rest/api/camera', methods=['GET', 'POST'])
+@app.route('/rest/api/camera', methods=['GET'])  # , 'POST'
 def camera_list():
-    user_id = request.form['user_id']
+    user_id = flask.session['email_address']
     result = list_all_cameras(user_id)
     # result = {
     #     'results': {
@@ -519,26 +514,32 @@ def detector():
         detector_id = get_detector_by_camera(user_id, camera_id)
         keyword = get_keyword(detector_id)
         # print(file, email, uuid)
-        base_folder = '/monitor/' + user_id + '/' + camera_id + '/'
-        normal_folder = base_folder + 'normal/'
-        alert_folder = base_folder + 'alert/'
-        filename = str(int(time.time())) + ".jpeg"
-        full_name = normal_folder + filename
-        print(os.path.abspath(filename))
-        file.save(full_name)
-        insert_image(user_id, camera_id, 'normal', full_name)
+        base_folder = 'monitor/' + user_id + '/' + camera_id + '/'  # /Users/Ethan/Downloads/
+        filename = 'monitor.jpeg'  # str(int(time.time())) + ".jpeg"
+        fullname = base_folder + filename
+        if not os.path.exists(base_folder):
+            os.makedirs(base_folder)
+        file.save(fullname)
+        # print(os.path.abspath(filename))
+
         # Classifying a picture from a file path
-        classification_result = api.classify_image(detector_id=detector_id, image_file=filename)
+        classification_result = api.classify_image(detector_id=detector_id, image_file=fullname)
         # print(stadium_classification_result)
-        value = classification_result['results'][0]['predictions']['labels'][keyword]
-        if float(value) > 0.8:
-            full_name = alert_folder + filename
-            file.save(full_name)
-            insert_image(user_id, camera_id, 'alert', full_name)
+        # print(classification_result)
+        value = classification_result['results'][0]['predictions'][0]['labels'][keyword]
+        if value > 0.8:
+            filename = 'alert_monitor.jpeg'
+        fullname = base_folder + filename
+        file.save(fullname)
+        insert_image(user_id, camera_id, fullname)
 
         response = flask.Response(json.dumps(classification_result))
         response.headers['Access-Control-Allow-Origin'] = '*'  #This is important for Mobile Device
         return response
+
+
+def check():
+    pass
 
 
 # #################COPY GOOGLE AUTH SAMPLE
@@ -606,9 +607,10 @@ def oauth2callback():
     credentials = flow.credentials
     flask.session['credentials'] = credentials_to_dict(credentials)
     user = flow.oauth2session.get('https://www.googleapis.com/oauth2/v3/userinfo').json()
+    flask.session['email_address'] = user['email']
     print(user)
 
-    return flask.redirect(flask.url_for('test_api_request'))
+    return flask.redirect(flask.url_for('hello'))
 
 # user = User.filter_by(google_id=userinfo['id']).first()
 #     if user:
@@ -683,5 +685,5 @@ def print_index_table():
 
 if __name__ == '__main__':
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-    app.run(host='0.0.0.0', port='80',threaded=True)
+    app.run(threaded=True)
 # host='0.0.0.0', port='80',
