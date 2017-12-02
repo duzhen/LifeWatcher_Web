@@ -316,9 +316,8 @@ def list_all_cameras(user_id):
     print(result)
     if result:
         for c in result:
-            name = get_detector_name(user_id, c['detector_id'])
-            print(name)
-            c_list.append({'camera_id': c['camera_id'], 'detector_id': c['detector_id'], 'detector_name': name})
+            #name = get_detector_name(user_id, c['detector_id'])
+            c_list.append({'camera_id': c['camera_id'], 'detector_id': c['detector_id'], 'detector_name': c['detector_name']})
         return c_list
     return 'Error: no camera found'
 
