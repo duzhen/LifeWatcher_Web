@@ -570,6 +570,7 @@ def detector():
         camera_id = request.values['uuid']  # uuid
         print (user_id,camera_id)
         insert_camera(camera_id, user_id)
+        print(list_all_cameras(user_id))
 
         base_folder = 'static/monitor/' + user_id + '/' + camera_id + '/'  # /Users/Ethan/Downloads/
         filename = 'monitor' + str(int(time.time())) + ".jpeg"
