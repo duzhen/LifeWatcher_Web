@@ -53,6 +53,7 @@ def get_a_detector(user_id, detector_name):
 
 
 def get_detector_name(user_id, detector_id):
+    print (user_id, detector_id)
     client = get_an_instance()
     target_detector = client.local.users.find_one({'user_id': user_id, 'detector_id': detector_id})
     client.close()
@@ -312,9 +313,11 @@ def list_all_cameras(user_id):
     result = client.local.cameras.find({'user_id': user_id})
     client.close()
     c_list = []
+    print(result)
     if result:
         for c in result:
             name = get_detector_name(user_id, c['detector_id'])
+            print(name)
             c_list.append({'camera_id': c['camera_id'], 'detector_id': c['detector_id'], 'detector_name': name})
         return c_list
     return 'Error: no camera found'
@@ -565,6 +568,7 @@ def detector():
         file = request.files['file']
         user_id = request.values['email']  # email
         camera_id = request.values['uuid']  # uuid
+        print (user_id,camera_id)
         insert_camera(camera_id, user_id)
 
         base_folder = 'static/monitor/' + user_id + '/' + camera_id + '/'  # /Users/Ethan/Downloads/
