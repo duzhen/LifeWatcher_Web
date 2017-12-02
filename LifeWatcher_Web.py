@@ -123,7 +123,7 @@ def insert_camera(camera_id, user_id):
             client.local.cameras.insert_one(
                 {'user_id': user_id,
                  'camera_id': camera_id,
-                 'detector_id': None}
+                 'detector_id': ''}
             )
         except Exception:
             client.close()
