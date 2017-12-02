@@ -583,6 +583,7 @@ def detector():
 
         detector_id = get_detector_by_camera(user_id, camera_id)
         if not detector_id:
+            insert_image(user_id, camera_id, fullname)
             response = flask.Response(json.dumps(result))
             response.headers['Access-Control-Allow-Origin'] = '*'  # This is important for Mobile Device
             return response
