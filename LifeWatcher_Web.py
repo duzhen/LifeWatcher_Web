@@ -102,7 +102,7 @@ def classify_image_file():
 def get_an_instance():
     client = None
     try:
-        client = mongo_client.MongoClient("mongodb://localhost:27017")
+        client = mongo_client.MongoClient("mongodb://admin:daodev123@localhost:27017")
     except Exception:
         print("Database connection error.")
     return client
