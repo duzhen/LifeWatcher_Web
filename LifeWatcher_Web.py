@@ -329,7 +329,7 @@ def hello():
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
     # return redirect('http://localhost:5000/index.html')
-    return redirect("http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/index.html", code=302)
+    return redirect("http://watcher.life/index.html", code=302)
 
 
 @app.route('/<path:path>')
@@ -775,5 +775,5 @@ def print_index_table():
 
 if __name__ == '__main__':
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-    app.run(host='0.0.0.0', port='80', threaded=True)
+    app.run(host='0.0.0.0', port=80, threaded=True)
 # host='0.0.0.0', port='80',

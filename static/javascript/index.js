@@ -4,7 +4,7 @@ function loadDetector(id, parent) {
     // addElement ();
 
     var client = new sendRequest();
-    client.get('http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/rest/api/detector', function(response) {
+    client.get('http://watcher.life/rest/api/detector', function(response) {
         var detData = JSON.parse(response).detectors;
         var cont1 = document.createElement("div");
         cont1.className = "dropdown"
@@ -32,7 +32,7 @@ function loadDetector(id, parent) {
 function loadFrames() {
     // addElement ();
     var client = new sendRequest();
-    client.get('http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/rest/api/camera', function(response) {
+    client.get('http://watcher.life/rest/api/camera', function(response) {
         var camera = JSON.parse(response);
         for (index in camera){
             cameraid = camera[index];
@@ -101,7 +101,7 @@ function expand_menu(id, de, cont2){
 function setcamera(id, name) {
     var client = new sendRequest();
     var params = "camera_id="+id + "&detector_name=" +name
-    client.post('http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/rest/api/camera/setting', function(response) {
+    client.post('http://watcher.life/rest/api/camera/setting', function(response) {
         // var detData = JSON.parse(response).detectors;
         // for (index in detData){
         //     de = detData[index];
@@ -147,7 +147,7 @@ function refreshFrame(src, id, div2) {
 
     var client = new sendRequest();
     var params = "camera_id="+id
-    client.post('http://ec2-18-216-37-90.us-east-2.compute.amazonaws.com/rest/api/check', function(response) {
+    client.post('http://watcher.life/rest/api/check', function(response) {
         if(!response.includes("Error")) {
             if(response.includes("alert")) {
                 //set alert
