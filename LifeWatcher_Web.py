@@ -47,7 +47,7 @@ api = Matroid(client_id='CiAqy5iYxjsbwcZx', client_secret='raI42Xl0w4tAo1CCjnPIC
 # get a detector by user id and detector name
 def get_a_detector(user_id, detector_name):
     client = get_an_instance()
-    target_detector = client.local.users.find_one({'user_id': user_id, 'detector_name': detector_name})
+    target_detector = client.lifewatcher.users.find_one({'user_id': user_id, 'detector_name': detector_name})
     client.close()
     return target_detector['detector_id']
 
@@ -57,7 +57,7 @@ def get_detector_name(user_id, detector_id):
     if detector_id is None:
         return ''
     client = get_an_instance()
-    target_detector = client.local.users.find_one({'user_id': user_id, 'detector_id': detector_id})
+    target_detector = client.lifewatcher.users.find_one({'user_id': user_id, 'detector_id': detector_id})
     client.close()
     return target_detector['detector_name']
 
@@ -65,7 +65,7 @@ def get_detector_name(user_id, detector_id):
 # get a detector id by camera id
 def get_detector_by_camera(user_id, camera_id):
     client = get_an_instance()
-    target = client.local.cameras.find_one(
+    target = client.lifewatcher.cameras.find_one(
         {
             'user_id': user_id,
             'camera_id': camera_id
@@ -79,7 +79,7 @@ def get_detector_by_camera(user_id, camera_id):
 
 def get_keyword(detector_id):
     client = get_an_instance()
-    target = client.local.detectors.find_one({'id': detector_id})
+    target = client.lifewatcher.detectors.find_one({'id': detector_id})
     client.close()
     return target['name']
 
@@ -87,7 +87,7 @@ def get_keyword(detector_id):
 # get the image of camera
 def get_image(user_id, camera_id):
     client = get_an_instance()
-    target = client.local.monitor.find_one({'user_id': user_id, 'camera_id': camera_id})
+    target = client.lifewatcher.monitor.find_one({'user_id': user_id, 'camera_id': camera_id})
     client.close()
     return target['image_path']
 
@@ -111,7 +111,7 @@ def get_an_instance():
 # Check if the keyword is already in the database
 def exist_in_database(keyword):
     client = get_an_instance()
-    result = client.local.detectors.find_one({'name': keyword})
+    result = client.lifewatcher.detectors.find_one({'name': keyword})
     client.close()
     return result
 
@@ -119,10 +119,10 @@ def exist_in_database(keyword):
 # Check if a camera belongs to a user. If not exists, insert one.
 def insert_camera(camera_id, user_id):
     client = get_an_instance()
-    result = client.local.cameras.find_one({'camera_id': camera_id, 'user_id': user_id})
+    result = client.lifewatcher.cameras.find_one({'camera_id': camera_id, 'user_id': user_id})
     if not result:
         try:
-            client.local.cameras.insert_one(
+            client.lifewatcher.cameras.insert_one(
                 {'user_id': user_id,
                  'camera_id': camera_id,
                  'detector_id': None}
