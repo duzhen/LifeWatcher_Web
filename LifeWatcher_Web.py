@@ -102,7 +102,7 @@ def classify_image_file():
 def get_an_instance():
     client = None
     try:
-        client = mongo_client.MongoClient("mongodb://admin:daodev123@localhost:27017")
+        client = mongo_client.MongoClient("mongodb://dev:dev@localhost:27017/lifewatcher?authMechanism=SCRAM-SHA-1")
     except Exception:
         print("Database connection error.")
     return client
@@ -138,7 +138,7 @@ def insert_camera(camera_id, user_id):
 def insert_detector(keyword, detector_id, zip_file):
     client = get_an_instance()
     try:
-        client.local.detectors.insert_one(
+        client.lifewatcher.detectors.insert_one(
             {
                 "name": keyword,
                 "id": detector_id,
@@ -154,13 +154,13 @@ def insert_detector(keyword, detector_id, zip_file):
 # Save the path of an image from a camera to database
 def insert_image(user_id, camera_id, image_path):
     client = get_an_instance()
-    exist = client.local.monitor.find_one({
+    exist = client.lifewatcher.monitor.find_one({
         'user_id': user_id,
         'camera_id': camera_id
     })
     if exist:
         try:
-            client.local.monitor.update_one(
+            client.lifewatcher.monitor.update_one(
                 {
                     "user_id": user_id,
                     "camera_id": camera_id,
@@ -176,7 +176,7 @@ def insert_image(user_id, camera_id, image_path):
             return False
     else:
         try:
-            client.local.monitor.insert_one(
+            client.lifewatcher.monitor.insert_one(
                 {
                     "user_id": user_id,
                     "camera_id": camera_id,
@@ -194,7 +194,7 @@ def insert_image(user_id, camera_id, image_path):
 def bind_detector_user(user_id, detector_name, detector_id):
     client = get_an_instance()
     try:
-        client.local.users.insert_one(
+        client.lifewatcher.users.insert_one(
             {
                 "user_id": user_id,
                 "detector_name": detector_name,
@@ -280,24 +280,24 @@ def download_images(items, folder):
 def bind_camera_detector(user_id, camera_id, detector_name):
     client = get_an_instance()
     result = None
-    detector_id = client.local.users.find_one(
+    detector_id = client.lifewatcher.users.find_one(
         {'user_id': user_id, 'detector_name': detector_name}
     )
     if detector_id:
-        result = client.local.cameras.find_one(
+        result = client.lifewatcher.cameras.find_one(
             {
                 "user_id": user_id,
                 "camera_id": camera_id
             })
         if result:
-            client.local.cameras.update_one(
+            client.lifewatcher.cameras.update_one(
                 {
                     'user_id': user_id,
                     'camera_id': camera_id
                 },
                 {'$set': {'detector_id': detector_id['detector_id']}})
         else:
-            client.local.cameras.insert_one(
+            client.lifewatcher.cameras.insert_one(
                 {'user_id': user_id,
                  'camera_id': camera_id,
                  'detector_id': detector_id['detector_id']}
@@ -312,7 +312,7 @@ def bind_camera_detector(user_id, camera_id, detector_name):
 # List all cameras of a user
 def list_all_cameras(user_id):
     client = get_an_instance()
-    result = client.local.cameras.find({'user_id': user_id})
+    result = client.lifewatcher.cameras.find({'user_id': user_id})
     client.close()
     c_list = []
     print(result)
@@ -366,7 +366,7 @@ def list_detectors():
     # detectors_to_use = api.list_detectors()
     user_id = flask.session['email_address']
     client = get_an_instance()
-    detectors_available = client.local.users.find({'user_id': user_id})
+    detectors_available = client.lifewatcher.users.find({'user_id': user_id})
     client.close()
     return detectors_available['detector_name'], detectors_available['detector_id']
 
@@ -376,7 +376,7 @@ def detector_creation():
     if request.method == 'GET':
         user_id = flask.session['email_address']
         client = get_an_instance()
-        detectors_available = client.local.users.find({'user_id': user_id})
+        detectors_available = client.lifewatcher.users.find({'user_id': user_id})
         client.close()
         detectors = []
         for d in detectors_available:
@@ -488,7 +488,7 @@ def release_camera():
     user_id = 'u001'
     camera_id = ['c002', 'c005']
     client = get_an_instance()
-    client.local.cameras.find_one_and_update({'user_id': user_id, 'camera_id': camera_id},
+    client.lifewatcher.cameras.find_one_and_update({'user_id': user_id, 'camera_id': camera_id},
                                              {'$set': {'detector_id': ''}})
     client.close()
 
@@ -499,7 +499,7 @@ def create_user():
     password = '123'
     client = get_an_instance()
     try:
-        client.local.credentials.insert_one(
+        client.lifewatcher.credentials.insert_one(
             {
                 "user_id": user_id,
                 "password": password
