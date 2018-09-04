@@ -102,7 +102,7 @@ def classify_image_file():
 def get_an_instance():
     client = None
     try:
-        client = mongo_client.MongoClient("mongodb://dev:dev@127.0.0.1:27017/lifewatcher?authMechanism=SCRAM-SHA-1")
+        client = mongo_client.MongoClient("mongodb://dev:dev@mongo:27017/lifewatcher?authMechanism=SCRAM-SHA-1")
     except Exception:
         print("Database connection error.")
     return client
